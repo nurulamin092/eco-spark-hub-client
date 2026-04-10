@@ -206,7 +206,7 @@ eco-spark-hub-client/
 │ │ ├── useDebounce.ts
 │ │ ├── useLocalStorage.ts
 │ │ ├── useAuthGuard.ts
-│ │ └── usePagination.ts # ✅ added
+│ │ └── usePagination.ts
 │
 │
 │ ├── middleware.ts 🔐 route protection
@@ -232,7 +232,7 @@ eco-spark-hub-client/
 │ └── globals.css
 │
 ├── middleware.ts
-├── tailwind.config.ts
+├──
 ├── next.config.js
 ├── package.json
 └── README.md
