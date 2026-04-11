@@ -2,7 +2,11 @@ import { apiClient } from "@/lib/api/base";
 import {
   AuthResponse,
   ForgotPasswordResponse,
+  ResendOtpRequest,
+  ResendOtpResponse,
   ResetPasswordResponse,
+  VerifyEmailRequest,
+  VerifyEmailResponse,
   VerifyOtpResponse,
 } from "../types/auth.types";
 
@@ -11,7 +15,7 @@ export const authService = {
     const response = await apiClient.post("/auth/login", { email, password });
     return response.data;
   },
-
+  // Register
   register: async (
     name: string,
     email: string,
@@ -24,6 +28,14 @@ export const authService = {
     });
     return response.data;
   },
+  // Email Verification
+  verifyEmail: async (
+    data: VerifyEmailRequest,
+  ): Promise<VerifyEmailResponse> => {
+    const response = await apiClient.post("/auth/verify-email", data);
+    return response.data;
+  },
+
   // Forgot Password - Request OTP
   forgotPassword: async (email: string): Promise<ForgotPasswordResponse> => {
     const response = await apiClient.post("/auth/forget-password", { email });
@@ -33,6 +45,11 @@ export const authService = {
   // Verify OTP
   verifyOtp: async (email: string, otp: string): Promise<VerifyOtpResponse> => {
     const response = await apiClient.post("/auth/verify-otp", { email, otp });
+    return response.data;
+  },
+  // Resend OTP
+  resendOtp: async (data: ResendOtpRequest): Promise<ResendOtpResponse> => {
+    const response = await apiClient.post("/auth/resend-otp", data);
     return response.data;
   },
 

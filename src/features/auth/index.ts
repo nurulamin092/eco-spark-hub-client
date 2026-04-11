@@ -35,6 +35,20 @@ export type {
   ResetPasswordFormValues,
 } from "./forget-password";
 
+// Verify Email
+export {
+  VerifyEmailForm,
+  ResendOtpButton,
+  useVerifyEmail,
+  useResendOtp,
+  verifyEmailSchema,
+  resendOtpSchema,
+} from "./verify-email";
+export type {
+  VerifyEmailFormValues,
+  ResendOtpFormValues,
+} from "./verify-email";
+
 // Shared
 export { useAuth } from "./shared/hooks/useAuth";
 export { authService } from "./shared/services/auth.service";

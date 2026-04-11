@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role: "MEMBER" | "ADMIN" | "SUPER_ADMIN";
   image?: string | null;
+  emailVerified: boolean;
 }
 
 export interface LoginResponse {
@@ -32,6 +33,32 @@ export interface AuthResponse {
     token: string;
   };
 }
+
+export interface VerifyEmailRequest {
+  email: string;
+  otp: string;
+}
+
+export interface VerifyEmailResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    emailVerified: boolean;
+  };
+}
+
+export interface ResendOtpRequest {
+  email: string;
+}
+
+export interface ResendOtpResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    resendAt: string;
+  };
+}
+
 export interface AuthRedirectFooterProps {
   text: string;
   linkText: string;
@@ -51,6 +78,7 @@ export interface VerifyOtpResponse {
   success: boolean;
   message: string;
 }
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
