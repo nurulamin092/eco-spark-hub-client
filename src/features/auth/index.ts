@@ -49,6 +49,14 @@ export type {
   ResendOtpFormValues,
 } from "./verify-email";
 
+// Change Password
+export {
+  ChangePasswordForm,
+  useChangePassword,
+  useChangePasswordForm,
+  changePasswordSchema,
+} from "./change-password";
+export type { ChangePasswordFormValues } from "./change-password";
 // Shared
 export { useAuth } from "./shared/hooks/useAuth";
 export { authService } from "./shared/services/auth.service";

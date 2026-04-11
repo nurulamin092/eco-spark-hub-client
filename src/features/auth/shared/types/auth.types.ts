@@ -58,6 +58,15 @@ export interface ResendOtpResponse {
     resendAt: string;
   };
 }
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
+}
 
 export interface AuthRedirectFooterProps {
   text: string;

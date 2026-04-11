@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api/base";
 import {
   AuthResponse,
+  ChangePasswordResponse,
   ForgotPasswordResponse,
   ResendOtpRequest,
   ResendOtpResponse,
@@ -67,11 +68,25 @@ export const authService = {
     return response.data;
   },
 
+  // Change Password
+  changePassword: async (
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<ChangePasswordResponse> => {
+    const response = await apiClient.post("/auth/change-password", {
+      currentPassword,
+      newPassword,
+    });
+    return response.data;
+  },
+
+  // Get Current User
   getMe: async () => {
     const response = await apiClient.get("/auth/me");
     return response.data;
   },
 
+  // Logout
   logout: async () => {
     try {
       await apiClient.post("/auth/logout");
