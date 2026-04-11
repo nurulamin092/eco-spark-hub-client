@@ -1,5 +1,10 @@
 import { apiClient } from "@/lib/api/base";
-import { AuthResponse } from "../types/auth.types";
+import {
+  AuthResponse,
+  ForgotPasswordResponse,
+  ResetPasswordResponse,
+  VerifyOtpResponse,
+} from "../types/auth.types";
 
 export const authService = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
@@ -16,6 +21,31 @@ export const authService = {
       name,
       email,
       password,
+    });
+    return response.data;
+  },
+  // Forgot Password - Request OTP
+  forgotPassword: async (email: string): Promise<ForgotPasswordResponse> => {
+    const response = await apiClient.post("/auth/forget-password", { email });
+    return response.data;
+  },
+
+  // Verify OTP
+  verifyOtp: async (email: string, otp: string): Promise<VerifyOtpResponse> => {
+    const response = await apiClient.post("/auth/verify-otp", { email, otp });
+    return response.data;
+  },
+
+  // Reset Password
+  resetPassword: async (
+    email: string,
+    otp: string,
+    newPassword: string,
+  ): Promise<ResetPasswordResponse> => {
+    const response = await apiClient.post("/auth/reset-password", {
+      email,
+      otp,
+      newPassword,
     });
     return response.data;
   },

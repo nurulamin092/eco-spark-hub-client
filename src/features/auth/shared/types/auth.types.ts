@@ -37,6 +37,20 @@ export interface AuthRedirectFooterProps {
   linkText: string;
   href: string;
 }
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface VerifyOtpResponse {
+  success: boolean;
+  message: string;
+}
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;

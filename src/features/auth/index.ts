@@ -17,6 +17,24 @@ export {
 
 export type { RegisterFormValues } from "./register";
 
+// Forgot Password
+export {
+  ForgotPasswordForm,
+  useForgotPassword,
+  useVerifyOtp,
+  useResetPassword,
+  useForgotPasswordForm,
+  useResetPasswordForm,
+  forgotPasswordSchema,
+  verifyOtpSchema,
+  resetPasswordSchema,
+} from "./forget-password";
+export type {
+  ForgotPasswordFormValues,
+  VerifyOtpFormValues,
+  ResetPasswordFormValues,
+} from "./forget-password";
+
 // Shared
 export { useAuth } from "./shared/hooks/useAuth";
 export { authService } from "./shared/services/auth.service";
