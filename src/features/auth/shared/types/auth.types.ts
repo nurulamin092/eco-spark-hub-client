@@ -5,6 +5,9 @@ export interface User {
   role: "MEMBER" | "ADMIN" | "SUPER_ADMIN";
   image?: string | null;
   emailVerified: boolean;
+  bio?: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface LoginResponse {
@@ -88,6 +91,29 @@ export interface VerifyOtpResponse {
   message: string;
 }
 
+export interface UpdateProfileRequest {
+  name?: string;
+  email?: string;
+  bio?: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+  };
+}
+
+export interface UploadAvatarResponse {
+  success: boolean;
+  message: string;
+  data: {
+    imageUrl: string;
+  };
+}
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;

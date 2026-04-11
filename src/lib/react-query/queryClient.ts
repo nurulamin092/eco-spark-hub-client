@@ -15,6 +15,9 @@ export const queryClient = new QueryClient({
 
 export const queryKeys = {
   auth: { me: ["auth", "me"] as const },
+  user: {
+    profile: ["user", "profile"] as const,
+  },
   ideas: {
     all: ["ideas"] as const,
     list: (filters?: any) => ["ideas", "list", filters] as const,
@@ -22,5 +25,22 @@ export const queryKeys = {
     featured: (limit?: number) => ["ideas", "featured", limit] as const,
     testimonials: (limit?: number) => ["ideas", "testimonials", limit] as const,
   },
-  categories: { all: ["categories", "all"] as const },
+
+  votes: {
+    userVote: (ideaId: string) => ["votes", "user", ideaId] as const,
+    myVotes: (params?: any) => ["votes", "my-votes", params] as const,
+  },
+  comments: {
+    byIdea: (ideaId: string) => ["comments", "by-idea", ideaId] as const,
+  },
+  categories: {
+    all: ["categories", "all"] as const,
+  },
+  payments: {
+    myPayments: ["payments", "my-payments"] as const,
+    verifyAccess: (ideaId: string) => ["payments", "verify", ideaId] as const,
+  },
+  newsletter: {
+    subscribe: ["newsletter", "subscribe"] as const,
+  },
 };

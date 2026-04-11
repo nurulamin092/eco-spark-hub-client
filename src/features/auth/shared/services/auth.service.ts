@@ -6,6 +6,9 @@ import {
   ResendOtpRequest,
   ResendOtpResponse,
   ResetPasswordResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+  UploadAvatarResponse,
   VerifyEmailRequest,
   VerifyEmailResponse,
   VerifyOtpResponse,
@@ -79,7 +82,21 @@ export const authService = {
     });
     return response.data;
   },
+  updateProfile: async (
+    data: UpdateProfileRequest,
+  ): Promise<UpdateProfileResponse> => {
+    const response = await apiClient.patch("/auth/profile", data);
+    return response.data;
+  },
 
+  uploadAvatar: async (file: File): Promise<UploadAvatarResponse> => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const response = await apiClient.post("/auth/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  },
   // Get Current User
   getMe: async () => {
     const response = await apiClient.get("/auth/me");
