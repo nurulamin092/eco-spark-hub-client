@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/providers/AuthProvider";
+
 import { Button } from "@/components/ui/button";
 import { Leaf, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useState } from "react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const navItems = [
   { href: "/", label: "Home" },

@@ -45,17 +45,14 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         }
       } catch {
-        // ✅ FIXED: Removed unused variable 'refreshError'
         // Only clear tokens and redirect for protected routes
         if (!isAuthMeEndpoint) {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
-          // Don't auto-redirect here - let the component handle it
         }
       }
     }
 
-    // Don't throw error for auth/me endpoint - just return null-like response
     if (isAuthMeEndpoint && error.response?.status === 401) {
       return Promise.reject(error);
     }
