@@ -3,8 +3,9 @@
 
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
-import { loginSchema, LoginFormValues } from "../schemas/auth.schema";
+
 import { useLoginMutation } from "./useLoginMutation";
+import { LoginFormValues, loginSchema } from "../schemas/login.schema";
 
 export function useLoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);

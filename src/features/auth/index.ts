@@ -1,24 +1,28 @@
-// Components
-export { LoginForm } from "./components/LoginForm";
+export {
+  LoginForm,
+  useLoginForm,
+  useLoginMutation,
+  loginSchema,
+} from "./login";
 
-export { useAuth } from "./hooks/useAuth";
-export { useLoginMutation } from "./hooks/useLoginMutation";
-export { useLoginForm } from "./hooks/useLoginForm";
+export type { LoginFormValues } from "./login";
 
-// Services
-export { authService } from "./services/auth.service";
+// Register
+export {
+  RegisterForm,
+  useRegisterForm,
+  useRegisterMutation,
+  registerSchema,
+} from "./register";
 
-// Schemas
-export { loginSchema, registerSchema } from "./schemas/auth.schema";
+export type { RegisterFormValues } from "./register";
 
-// Types
+// Shared
+export { useAuth } from "./shared/hooks/useAuth";
+export { authService } from "./shared/services/auth.service";
+export { SocialLoginButtons } from "./shared/components/SocialLoginButtons";
 export type {
   User,
-  LoginResponse,
-  LoginCredentials,
+  AuthResponse,
   AuthContextType,
-} from "./types/auth.types";
-export type {
-  LoginFormValues,
-  RegisterFormValues,
-} from "./schemas/auth.schema";
+} from "./shared/types/auth.types";

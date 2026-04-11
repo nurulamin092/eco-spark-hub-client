@@ -4,7 +4,7 @@ import { createContext, useMemo, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/lib/api/auth.api";
 import { queryKeys } from "@/lib/react-query/queryClient";
-import { AuthContextType } from "@/features/auth/types/auth.types";
+import { AuthContextType } from "@/features/auth/shared/types/auth.types";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined,

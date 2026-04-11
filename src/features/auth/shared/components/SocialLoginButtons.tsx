@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "@/components/shared/icons/GoogleIcon";
 import { env } from "@/lib/config/env";
-
 interface SocialLoginButtonsProps {
   isLoading?: boolean;
 }
@@ -12,16 +11,8 @@ export function SocialLoginButtons({
   isLoading = false,
 }: SocialLoginButtonsProps) {
   const handleGoogleLogin = () => {
-    // Get base URL from config (type-safe)
     const baseUrl = env.NEXT_PUBLIC_API_URL;
-    const googleAuthUrl = `${baseUrl}/auth/login/google`;
-
-    // Store current path to redirect back after login
-    const currentPath = window.location.pathname;
-    sessionStorage.setItem("redirectAfterLogin", currentPath);
-
-    // Full page redirect for OAuth
-    window.location.href = googleAuthUrl;
+    window.location.href = `${baseUrl}/auth/login/google`;
   };
 
   return (

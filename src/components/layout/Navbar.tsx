@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Leaf, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useState } from "react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useAuth } from "@/features/auth/shared/hooks/useAuth";
 
 const navItems = [
   { href: "/", label: "Home" },
