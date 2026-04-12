@@ -69,6 +69,14 @@ export {
 } from "./sessions";
 export type { Session, SessionsResponse } from "./sessions";
 
+// Delete Account
+export {
+  DeleteAccountButton,
+  DeleteAccountModal,
+  useDeleteAccount,
+  deleteAccountSchema,
+} from "./delete-account";
+export type { DeleteAccountFormValues } from "./delete-account";
 // Shared
 export { useAuth } from "./shared/hooks/useAuth";
 export { authService } from "./shared/services/auth.service";

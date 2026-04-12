@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api/base";
 import {
   AuthResponse,
   ChangePasswordResponse,
+  DeleteAccountResponse,
   ForgotPasswordResponse,
   ResendOtpRequest,
   ResendOtpResponse,
@@ -129,6 +130,13 @@ export const authService = {
     return response.data;
   },
 
+  // Delete Account
+  deleteAccount: async (password: string): Promise<DeleteAccountResponse> => {
+    const response = await apiClient.delete("/auth/account", {
+      data: { password },
+    });
+    return response.data;
+  },
   // Logout
   logout: async () => {
     try {

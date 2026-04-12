@@ -114,6 +114,16 @@ export interface UploadAvatarResponse {
     imageUrl: string;
   };
 }
+
+export interface DeleteAccountRequest {
+  password: string;
+  confirmText: string;
+}
+
+export interface DeleteAccountResponse {
+  success: boolean;
+  message: string;
+}
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;

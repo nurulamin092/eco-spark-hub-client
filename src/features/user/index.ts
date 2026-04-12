@@ -1,6 +1,8 @@
+// Profile
 export {
   ProfileForm,
   ProfileAvatar,
+  DangerZone,
   useProfile,
   useUpdateProfile,
   useUploadAvatar,
