@@ -1,44 +1,31 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Bookmark, Share2, Lock } from "lucide-react";
+import { Share2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Idea } from "../../shared/types/idea.types";
 import { VoteButtons } from "@/features/vote/components/VoteButtons";
+import { BookmarkButton } from "@/features/bookmark/components/BookmarkButton";
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
 
 interface IdeaActionsProps {
   idea: Idea;
-  onBookmark: () => Promise<void>;
   onShare: () => void;
-  isBookmarked?: boolean;
 }
 
-export function IdeaActions({
-  idea,
-  onBookmark,
-  onShare,
-  isBookmarked = false,
-}: IdeaActionsProps) {
+export function IdeaActions({ idea, onShare }: IdeaActionsProps) {
   const { isAuthenticated } = useAuth();
-  const [isBookmarking, setIsBookmarking] = useState<boolean>(false);
 
-  const handleBookmark = useCallback(async (): Promise<void> => {
+  const handleShare = useCallback(() => {
     if (!isAuthenticated) {
-      toast.error("Please login to bookmark");
+      toast.error("Please login to share");
       return;
     }
+    onShare();
+  }, [isAuthenticated, onShare]);
 
-    setIsBookmarking(true);
-    try {
-      await onBookmark();
-    } finally {
-      setIsBookmarking(false);
-    }
-  }, [isAuthenticated, onBookmark]);
-
-  const isLocked: boolean = Boolean(idea.isLocked);
+  const isLocked = Boolean(idea.isLocked);
 
   return (
     <div className="flex flex-wrap gap-4 items-center">
@@ -50,21 +37,9 @@ export function IdeaActions({
         showLabels
       />
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleBookmark}
-        disabled={isBookmarking || isLocked}
-      >
-        <Bookmark
-          className={`h-4 w-4 mr-1 ${
-            isBookmarked ? "fill-primary text-primary" : ""
-          }`}
-        />
-        {isBookmarked ? "Saved" : "Save"}
-      </Button>
+      <BookmarkButton ideaId={idea.id} size="md" showLabel />
 
-      <Button variant="outline" size="sm" onClick={onShare}>
+      <Button variant="outline" size="sm" onClick={handleShare}>
         <Share2 className="h-4 w-4 mr-1" />
         Share
       </Button>

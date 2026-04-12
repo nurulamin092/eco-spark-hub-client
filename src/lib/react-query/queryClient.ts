@@ -39,6 +39,12 @@ export const queryKeys = {
   comments: {
     byIdea: (ideaId: string) => ["comments", "by-idea", ideaId] as const,
   },
+  bookmarks: {
+    all: ["bookmarks"] as const,
+    list: (page?: number, limit?: number) =>
+      ["bookmarks", "list", { page, limit }] as const,
+    check: (ideaId: string) => ["bookmarks", "check", ideaId] as const,
+  },
 
   payments: {
     myPayments: ["payments", "my-payments"] as const,

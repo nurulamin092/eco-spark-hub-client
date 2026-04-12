@@ -24,11 +24,6 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
   const { isAuthenticated } = useAuth();
   const { data: idea, isLoading, error } = useIdeaDetails(ideaId);
 
-  const handleBookmark = useCallback(async () => {
-    // Implement bookmark logic here
-    toast.success("Bookmarked");
-  }, []);
-
   const handleShare = useCallback(() => {
     if (navigator.share) {
       navigator.share({
@@ -78,12 +73,7 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
       </div>
 
       <div className="border-t pt-6">
-        <IdeaActions
-          idea={idea}
-          onBookmark={handleBookmark}
-          onShare={handleShare}
-          isBookmarked={false}
-        />
+        <IdeaActions idea={idea} onShare={handleShare} />
       </div>
 
       {/* Comments Section */}
