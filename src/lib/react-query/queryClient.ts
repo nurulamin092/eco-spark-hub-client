@@ -52,5 +52,7 @@ export const queryKeys = {
   },
   newsletter: {
     subscribe: ["newsletter", "subscribe"] as const,
+    subscribers: (params?: unknown) =>
+      ["newsletter", "subscribers", params] as const,
   },
 };

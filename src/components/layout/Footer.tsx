@@ -1,3 +1,4 @@
+import { NewsletterForm } from "@/features/newsletter/components/NewsletterForm";
 import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
@@ -13,6 +14,11 @@ export function Footer() {
               planet.
             </p>
           </div>
+          <div>
+            <h4 className="font-semibold mb-4">Subscribe</h4>
+            <NewsletterForm variant="footer" />
+          </div>
+
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
