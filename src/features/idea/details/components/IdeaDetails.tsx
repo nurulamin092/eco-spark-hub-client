@@ -23,11 +23,6 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
   const { isAuthenticated } = useAuth();
   const { data: idea, isLoading, error } = useIdeaDetails(ideaId);
 
-  const handleVote = useCallback(async (type: "UP" | "DOWN") => {
-    // Implement vote logic here
-    toast.success(`Voted ${type}`);
-  }, []);
-
   const handleBookmark = useCallback(async () => {
     // Implement bookmark logic here
     toast.success("Bookmarked");
@@ -51,7 +46,6 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
       router.push("/login");
       return;
     }
-    // Implement payment logic here
     toast.info("Payment integration coming soon");
   }, [isAuthenticated, router]);
 
@@ -85,10 +79,8 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
       <div className="border-t pt-6">
         <IdeaActions
           idea={idea}
-          onVote={handleVote}
           onBookmark={handleBookmark}
           onShare={handleShare}
-          userVote={null}
           isBookmarked={false}
         />
       </div>
