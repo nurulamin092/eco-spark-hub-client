@@ -9,14 +9,3 @@ export interface IdeaDetailsResponse {
   message: string;
   data: Idea;
 }
-
-export interface RelatedIdea {
-  id: string;
-  title: string;
-  slug: string;
-  upvoteCount: number;
-  author: {
-    name: string;
-    image: string | null;
-  };
-}

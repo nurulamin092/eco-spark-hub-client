@@ -1,16 +1,20 @@
 import { apiClient } from "@/lib/api/base";
 import {
   CreateIdeaPayload,
+  CreateIdeaResponse,
   UpdateIdeaPayload,
   IdeaFilters,
   IdeasResponse,
   Idea,
   Category,
-} from "../types/idea.types";
-import {
-  IdeaDetailsResponse,
+  MyIdeasFilters,
+  MyIdeasResponse,
+  DeleteIdeaResponse,
+  SubmitIdeaResponse,
+  EditIdeaResponse,
+  IdeaForEditResponse,
   RelatedIdea,
-} from "../../details/types/idea-details.types";
+} from "../types/idea.types";
 
 export const ideaService = {
   // Get all ideas (public)
@@ -20,12 +24,13 @@ export const ideaService = {
   },
 
   // Get single idea by ID
-  getIdeaById: async (id: string): Promise<IdeaDetailsResponse> => {
+  getIdeaById: async (
+    id: string,
+  ): Promise<{ success: boolean; message: string; data: Idea }> => {
     const response = await apiClient.get(`/ideas/${id}`);
     return response.data;
   },
 
-  // Get related ideas
   getRelatedIdeas: async (
     ideaId: string,
     limit: number = 3,
@@ -36,18 +41,16 @@ export const ideaService = {
     return response.data;
   },
 
-  // Get idea by slug
-  getIdeaBySlug: async (
-    slug: string,
-  ): Promise<{ success: boolean; message: string; data: Idea }> => {
-    const response = await apiClient.get(`/ideas/slug/${slug}`);
+  // Get idea for edit (checks ownership)
+  getIdeaForEdit: async (id: string): Promise<IdeaForEditResponse> => {
+    const response = await apiClient.get(`/ideas/${id}/edit`);
     return response.data;
   },
 
   // Create idea (draft)
   createIdea: async (
     payload: CreateIdeaPayload,
-  ): Promise<{ success: boolean; message: string; data: Idea }> => {
+  ): Promise<CreateIdeaResponse> => {
     const response = await apiClient.post("/ideas", payload);
     return response.data;
   },
@@ -56,32 +59,25 @@ export const ideaService = {
   updateIdea: async (
     id: string,
     payload: UpdateIdeaPayload,
-  ): Promise<{ success: boolean; message: string; data: Idea }> => {
+  ): Promise<EditIdeaResponse> => {
     const response = await apiClient.patch(`/ideas/${id}`, payload);
     return response.data;
   },
 
   // Delete idea
-  deleteIdea: async (
-    id: string,
-  ): Promise<{ success: boolean; message: string }> => {
+  deleteIdea: async (id: string): Promise<DeleteIdeaResponse> => {
     const response = await apiClient.delete(`/ideas/${id}`);
     return response.data;
   },
 
   // Submit idea for review
-  submitIdea: async (
-    id: string,
-  ): Promise<{ success: boolean; message: string; data: Idea }> => {
+  submitIdea: async (id: string): Promise<SubmitIdeaResponse> => {
     const response = await apiClient.patch(`/ideas/${id}/submit`);
     return response.data;
   },
 
   // Get my ideas
-  getMyIdeas: async (filters?: {
-    page?: number;
-    limit?: number;
-  }): Promise<IdeasResponse> => {
+  getMyIdeas: async (filters?: MyIdeasFilters): Promise<MyIdeasResponse> => {
     const response = await apiClient.get("/ideas/my-ideas", {
       params: filters,
     });
@@ -119,6 +115,7 @@ export const ideaService = {
     return response.data;
   },
 
+  // Get categories
   getCategories: async (): Promise<{ success: boolean; data: Category[] }> => {
     const response = await apiClient.get("/categories");
     return response.data;

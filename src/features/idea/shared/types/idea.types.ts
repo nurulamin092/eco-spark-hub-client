@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Category {
   id: string;
   name: string;
@@ -23,8 +22,8 @@ export interface Idea {
   problem: string;
   solution: string;
   description: string;
-  images: any[] | null;
-  attachments: any[] | null;
+  images: unknown[] | null;
+  attachments: unknown[] | null;
   viewCount: number;
   upvoteCount: number;
   downvoteCount: number;
@@ -54,12 +53,22 @@ export interface CreateIdeaPayload {
   isPaid?: boolean;
   price?: number;
 }
+
 export interface CreateIdeaResponse {
   success: boolean;
   message: string;
   data: Idea;
 }
-export interface UpdateIdeaPayload extends Partial<CreateIdeaPayload> {
+
+// ✅ FIXED: Allow null for price to match EditIdeaPayload
+export interface UpdateIdeaPayload {
+  title?: string;
+  problem?: string;
+  solution?: string;
+  description?: string;
+  categoryId?: string;
+  isPaid?: boolean;
+  price?: number | null;
   status?: "DRAFT" | "UNDER_REVIEW";
 }
 
@@ -85,4 +94,69 @@ export interface IdeaFilters {
   isPaid?: boolean;
   sort?: "recent" | "top" | "commented" | "trending";
   status?: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+}
+
+export interface MyIdeasFilters {
+  page?: number;
+  limit?: number;
+  status?: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+  search?: string;
+}
+
+export interface MyIdeasResponse {
+  success: boolean;
+  message: string;
+  data: {
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+    data: Idea[];
+  };
+}
+
+export interface DeleteIdeaResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface SubmitIdeaResponse {
+  success: boolean;
+  message: string;
+  data: Idea;
+}
+
+export interface EditIdeaPayload {
+  title?: string;
+  problem?: string;
+  solution?: string;
+  description?: string;
+  categoryId?: string;
+  isPaid?: boolean;
+  price?: number | null;
+}
+
+export interface EditIdeaResponse {
+  success: boolean;
+  message: string;
+  data: Idea;
+}
+
+export interface RelatedIdea {
+  id: string;
+  title: string;
+  slug: string;
+  upvoteCount: number;
+  author: {
+    name: string;
+    image: string | null;
+  };
+}
+
+export interface IdeaForEditResponse {
+  success: boolean;
+  message: string;
+  data: Idea;
 }
