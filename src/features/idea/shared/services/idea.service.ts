@@ -6,6 +6,10 @@ import {
   IdeasResponse,
   Idea,
 } from "../types/idea.types";
+import {
+  IdeaDetailsResponse,
+  RelatedIdea,
+} from "../../details/types/idea-details.types";
 
 export const ideaService = {
   // Get all ideas (public)
@@ -15,10 +19,19 @@ export const ideaService = {
   },
 
   // Get single idea by ID
-  getIdeaById: async (
-    id: string,
-  ): Promise<{ success: boolean; message: string; data: Idea }> => {
+  getIdeaById: async (id: string): Promise<IdeaDetailsResponse> => {
     const response = await apiClient.get(`/ideas/${id}`);
+    return response.data;
+  },
+
+  // Get related ideas
+  getRelatedIdeas: async (
+    ideaId: string,
+    limit: number = 3,
+  ): Promise<{ success: boolean; data: RelatedIdea[] }> => {
+    const response = await apiClient.get(`/ideas/${ideaId}/related`, {
+      params: { limit },
+    });
     return response.data;
   },
 
