@@ -57,6 +57,18 @@ export {
   changePasswordSchema,
 } from "./change-password";
 export type { ChangePasswordFormValues } from "./change-password";
+
+// Sessions
+export {
+  SessionsList,
+  SessionCard,
+  RevokeAllButton,
+  useSessions,
+  useRevokeSession,
+  useRevokeAllSessions,
+} from "./sessions";
+export type { Session, SessionsResponse } from "./sessions";
+
 // Shared
 export { useAuth } from "./shared/hooks/useAuth";
 export { authService } from "./shared/services/auth.service";

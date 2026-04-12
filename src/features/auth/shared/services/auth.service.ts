@@ -13,6 +13,11 @@ import {
   VerifyEmailResponse,
   VerifyOtpResponse,
 } from "../types/auth.types";
+import {
+  RevokeAllSessionsResponse,
+  RevokeSessionResponse,
+  SessionsResponse,
+} from "../../sessions/types/session.types";
 
 export const authService = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
@@ -82,6 +87,8 @@ export const authService = {
     });
     return response.data;
   },
+
+  // Update Profile
   updateProfile: async (
     data: UpdateProfileRequest,
   ): Promise<UpdateProfileResponse> => {
@@ -89,6 +96,7 @@ export const authService = {
     return response.data;
   },
 
+  // Upload Avatar
   uploadAvatar: async (file: File): Promise<UploadAvatarResponse> => {
     const formData = new FormData();
     formData.append("avatar", file);
@@ -100,6 +108,24 @@ export const authService = {
   // Get Current User
   getMe: async () => {
     const response = await apiClient.get("/auth/me");
+    return response.data;
+  },
+
+  // Sessions
+  getSessions: async (): Promise<SessionsResponse> => {
+    const response = await apiClient.get("/auth/sessions");
+    return response.data;
+  },
+
+  // Revoke Session
+  revokeSession: async (sessionId: string): Promise<RevokeSessionResponse> => {
+    const response = await apiClient.delete(`/auth/sessions/${sessionId}`);
+    return response.data;
+  },
+
+  // Revoke All Sessions
+  revokeAllSessions: async (): Promise<RevokeAllSessionsResponse> => {
+    const response = await apiClient.delete("/auth/sessions");
     return response.data;
   },
 
