@@ -54,7 +54,11 @@ export interface CreateIdeaPayload {
   isPaid?: boolean;
   price?: number;
 }
-
+export interface CreateIdeaResponse {
+  success: boolean;
+  message: string;
+  data: Idea;
+}
 export interface UpdateIdeaPayload extends Partial<CreateIdeaPayload> {
   status?: "DRAFT" | "UNDER_REVIEW";
 }

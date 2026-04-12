@@ -5,6 +5,7 @@ import {
   IdeaFilters,
   IdeasResponse,
   Idea,
+  Category,
 } from "../types/idea.types";
 import {
   IdeaDetailsResponse,
@@ -115,6 +116,10 @@ export const ideaService = {
     const response = await apiClient.get(`/ideas/category/${categoryId}`, {
       params: filters,
     });
+    return response.data;
+  },
+  getCategories: async (): Promise<{ success: boolean; data: Category[] }> => {
+    const response = await apiClient.get("/categories");
     return response.data;
   },
 };
