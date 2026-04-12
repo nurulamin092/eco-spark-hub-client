@@ -124,7 +124,7 @@ export function MyIdeasList() {
             </div>
           )}
         </>
-      )}
+      )}  
     </div>
   );
 }
