@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { authService } from "../../shared/services/auth.service";
-import { queryKeys } from "@/lib/react-query/queryKeys";
+import { queryKeys } from "@/lib/react-query/queryClient";
 
 export function useRevokeSession() {
   const queryClient = useQueryClient();

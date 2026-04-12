@@ -14,16 +14,21 @@ export const queryClient = new QueryClient({
 });
 
 export const queryKeys = {
-  auth: { me: ["auth", "me"] as const },
+  auth: {
+    me: ["auth", "me"] as const,
+    sessions: ["auth", "sessions"] as const,
+  },
   user: {
     profile: ["user", "profile"] as const,
   },
+
   ideas: {
     all: ["ideas"] as const,
     list: (filters?: any) => ["ideas", "list", filters] as const,
     detail: (id: string) => ["ideas", "detail", id] as const,
-    featured: (limit?: number) => ["ideas", "featured", limit] as const,
+    myIdeas: (params?: any) => ["ideas", "my-ideas", params] as const,
     testimonials: (limit?: number) => ["ideas", "testimonials", limit] as const,
+    featured: (limit?: number) => ["ideas", "featured", limit] as const,
   },
 
   votes: {
