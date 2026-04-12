@@ -1,0 +1,82 @@
+"use client";
+
+import { useCallback } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { IdeaStatus } from "../types/my-ideas.types";
+
+interface MyIdeasFiltersProps {
+  search: string;
+  status: IdeaStatus | "ALL";
+  onSearchChange: (value: string) => void;
+  onStatusChange: (value: IdeaStatus | "ALL") => void;
+}
+
+const statusOptions = [
+  { value: "ALL", label: "All Status" },
+  { value: "DRAFT", label: "Draft" },
+  { value: "UNDER_REVIEW", label: "Under Review" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "REJECTED", label: "Rejected" },
+];
+
+export function MyIdeasFilters({
+  search,
+  status,
+  onSearchChange,
+  onStatusChange,
+}: MyIdeasFiltersProps) {
+  const handleClearSearch = useCallback(() => {
+    onSearchChange("");
+  }, [onSearchChange]);
+
+  return (
+    <div className="flex flex-col sm:flex-row gap-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search your ideas..."
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="pl-9 pr-9"
+        />
+        {search && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+            onClick={handleClearSearch}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      <Select
+        value={status}
+        onValueChange={(value) => onStatusChange(value as IdeaStatus | "ALL")}
+      >
+        <SelectTrigger className="w-45">
+          <SelectValue placeholder="Filter by status" />
+        </SelectTrigger>
+        <SelectContent>
+          {statusOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}

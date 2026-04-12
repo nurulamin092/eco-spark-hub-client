@@ -118,6 +118,7 @@ export const ideaService = {
     });
     return response.data;
   },
+
   getCategories: async (): Promise<{ success: boolean; data: Category[] }> => {
     const response = await apiClient.get("/categories");
     return response.data;
