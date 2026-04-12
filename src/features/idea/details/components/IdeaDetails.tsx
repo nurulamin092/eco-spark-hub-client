@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -13,15 +12,12 @@ import { IdeaContent } from "./IdeaContent";
 import { IdeaActions } from "./IdeaActions";
 import { PaywallOverlay } from "./PaywallOverlay";
 import { CommentList } from "@/features/comment/components/CommentList";
-import { useAuth } from "@/features/auth/shared/hooks/useAuth";
 
 interface IdeaDetailsProps {
   ideaId: string;
 }
 
 export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
-  const router = useRouter();
-  const { isAuthenticated } = useAuth();
   const { data: idea, isLoading, error } = useIdeaDetails(ideaId);
 
   const handleShare = useCallback(() => {
@@ -36,14 +32,6 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
       toast.success("Link copied to clipboard");
     }
   }, [idea]);
-
-  const handlePurchase = useCallback(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-      return;
-    }
-    toast.info("Payment integration coming soon");
-  }, [isAuthenticated, router]);
 
   if (isLoading) {
     return <IdeaDetailsSkeleton />;
@@ -69,7 +57,7 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
 
       <div className="relative">
         <IdeaContent idea={idea} isLocked={isLocked} />
-        {isLocked && <PaywallOverlay idea={idea} onPurchase={handlePurchase} />}
+        {isLocked && <PaywallOverlay idea={idea} />}
       </div>
 
       <div className="border-t pt-6">

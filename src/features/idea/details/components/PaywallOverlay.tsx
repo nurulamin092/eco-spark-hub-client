@@ -1,16 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Lock, DollarSign, Zap } from "lucide-react";
+import { Lock, DollarSign } from "lucide-react";
 import { Idea } from "../../shared/types/idea.types";
+import { PaymentButton } from "@/features/payment/components/PaymentButton";
 
 interface PaywallOverlayProps {
   idea: Idea;
-  onPurchase: () => void;
 }
 
-export function PaywallOverlay({ idea, onPurchase }: PaywallOverlayProps) {
+export function PaywallOverlay({ idea }: PaywallOverlayProps) {
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 rounded-lg" />
@@ -29,10 +28,7 @@ export function PaywallOverlay({ idea, onPurchase }: PaywallOverlayProps) {
             <span className="text-2xl font-bold">${idea.price}</span>
             <span className="text-muted-foreground">one-time payment</span>
           </div>
-          <Button onClick={onPurchase} className="w-full gap-2">
-            <Zap className="h-4 w-4" />
-            Unlock for ${idea.price}
-          </Button>
+          <PaymentButton ideaId={idea.id} price={idea.price || 0} size="lg" />
           <p className="text-xs text-muted-foreground mt-4">
             One-time payment. Lifetime access.
           </p>
