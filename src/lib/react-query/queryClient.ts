@@ -1,17 +1,54 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QueryClient } from "@tanstack/react-query";
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000,
-      gcTime: 5 * 60 * 1000,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-    mutations: { retry: 0 },
-  },
-});
+let browserQueryClient: QueryClient | undefined = undefined;
+
+export function getQueryClient() {
+  if (typeof window === "undefined") {
+    // Server: always create a new QueryClient
+    return new QueryClient({
+      defaultOptions: {
+        queries: {
+          staleTime: 60 * 1000,
+          gcTime: 5 * 60 * 1000,
+          retry: 1,
+          refetchOnWindowFocus: false,
+        },
+        mutations: { retry: 0 },
+      },
+    });
+  } else {
+    if (!browserQueryClient) {
+      browserQueryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+            gcTime: 5 * 60 * 1000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+          mutations: { retry: 0 },
+        },
+      });
+    }
+    return browserQueryClient;
+  }
+}
+
+export const queryClient =
+  typeof window !== "undefined"
+    ? getQueryClient()
+    : new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000,
+            gcTime: 5 * 60 * 1000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+          mutations: { retry: 0 },
+        },
+      });
 
 export const queryKeys = {
   auth: {
@@ -45,7 +82,6 @@ export const queryKeys = {
       ["bookmarks", "list", { page, limit }] as const,
     check: (ideaId: string) => ["bookmarks", "check", ideaId] as const,
   },
-
   payments: {
     myPayments: ["payments", "my-payments"] as const,
     verifyAccess: (ideaId: string) => ["payments", "verify", ideaId] as const,
@@ -54,5 +90,8 @@ export const queryKeys = {
     subscribe: ["newsletter", "subscribe"] as const,
     subscribers: (params?: unknown) =>
       ["newsletter", "subscribers", params] as const,
+  },
+  admin: {
+    dashboard: ["admin", "dashboard"] as const,
   },
 };
