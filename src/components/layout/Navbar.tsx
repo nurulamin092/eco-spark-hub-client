@@ -8,6 +8,7 @@ import { Leaf, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useState } from "react";
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
+import { NotificationBell } from "@/features/notification";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -93,6 +94,7 @@ export function Navbar() {
           ))}
           <div className="pt-2 flex items-center justify-between">
             <ThemeToggle />
+            <NotificationBell />
             {isAuthenticated ? (
               <Button variant="ghost" size="sm" onClick={logout}>
                 Logout

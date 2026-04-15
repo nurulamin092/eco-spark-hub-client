@@ -94,4 +94,8 @@ export const queryKeys = {
   admin: {
     dashboard: ["admin", "dashboard"] as const,
   },
+  notifications: {
+    all: ["notifications"] as const,
+    unread: ["notifications", "unread"] as const,
+  },
 };
