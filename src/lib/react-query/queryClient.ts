@@ -101,4 +101,8 @@ export const queryKeys = {
   audit: {
     logs: (filters?: unknown) => ["audit", "logs", filters] as const,
   },
+  activities: {
+    my: (filters?: unknown) => ["activities", "my", filters] as const,
+    all: (filters?: unknown) => ["activities", "all", filters] as const,
+  },
 };
