@@ -98,4 +98,7 @@ export const queryKeys = {
     all: ["notifications"] as const,
     unread: ["notifications", "unread"] as const,
   },
+  audit: {
+    logs: (filters?: unknown) => ["audit", "logs", filters] as const,
+  },
 };
