@@ -12,6 +12,7 @@ import { IdeaContent } from "./IdeaContent";
 import { IdeaActions } from "./IdeaActions";
 import { PaywallOverlay } from "./PaywallOverlay";
 import { CommentList } from "@/features/comment/components/CommentList";
+import { ImageGallery, UploadedImage } from "@/features/upload";
 
 interface IdeaDetailsProps {
   ideaId: string;
@@ -50,10 +51,20 @@ export function IdeaDetails({ ideaId }: IdeaDetailsProps) {
 
   const isLocked = idea.isPaid && idea.isLocked;
 
+  const typedImages = (idea.images as UploadedImage[]) || [];
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <IdeaHeader idea={idea} />
       <IdeaStats idea={idea} />
+
+      {/* Image Gallery Section - Added after Stats */}
+      {typedImages.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Images</h3>
+          <ImageGallery images={typedImages} ideaId={idea.id} />
+        </div>
+      )}
 
       <div className="relative">
         <IdeaContent idea={idea} isLocked={isLocked} />
@@ -87,6 +98,17 @@ function IdeaDetailsSkeleton() {
         </div>
       </div>
       <Skeleton className="h-16 w-full" />
+
+      {/* Image Gallery Skeleton */}
+      <div className="space-y-3">
+        <Skeleton className="h-6 w-24" />
+        <div className="flex gap-3">
+          <Skeleton className="h-24 w-24 rounded-lg" />
+          <Skeleton className="h-24 w-24 rounded-lg" />
+          <Skeleton className="h-24 w-24 rounded-lg" />
+        </div>
+      </div>
+
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-32 w-full" />

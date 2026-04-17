@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import { ProfileAvatar } from "./ProfileAvatar";
+import { ProfileImageUpload } from "@/features/upload";
 import { useProfile } from "../hooks/useProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 import { profileSchema, ProfileFormValues } from "../schema/profile.schema";
@@ -98,7 +98,13 @@ export function ProfileForm() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <ProfileAvatar />
+          {/* ✅ Profile Image Upload - Integrated */}
+          <div className="flex flex-col items-center space-y-4 pb-6 border-b">
+            <ProfileImageUpload />
+            <p className="text-sm text-muted-foreground">
+              Click the camera icon to upload a profile picture
+            </p>
+          </div>
 
           <form
             onSubmit={(e) => {
@@ -214,6 +220,7 @@ export function ProfileForm() {
           </p>
         </CardFooter>
       </Card>
+
       <DangerZone />
     </div>
   );

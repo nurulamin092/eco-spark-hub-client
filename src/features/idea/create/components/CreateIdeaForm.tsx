@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { IdeaFormFields } from "./IdeaFormFields";
+import { ImageUploader } from "@/features/upload";
 import { useCreateIdeaForm } from "../hooks/useCreateIdeaForm";
 
 export function CreateIdeaForm() {
@@ -26,15 +27,12 @@ export function CreateIdeaForm() {
     handlePriceChange,
   } = useCreateIdeaForm();
 
-  // Single source of truth (form state)
   const isPaid = form.getFieldValue("isPaid");
 
-  // Sync price যখন isPaid change হয়
   useEffect(() => {
     handlePriceChange(isPaid);
   }, [isPaid, handlePriceChange]);
 
-  // Loading state (categories)
   if (isLoadingCategories) {
     return (
       <Card className="max-w-3xl mx-auto">
@@ -125,6 +123,25 @@ export function CreateIdeaForm() {
               />
             )}
           </form.Field>
+
+          {/* Image Upload Section */}
+          <div className="space-y-3 pt-2 border-t">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-primary" />
+              <label className="text-sm font-medium">
+                Idea Images (Optional)
+              </label>
+            </div>
+            <ImageUploader
+              ideaId="temp"
+              onUploadComplete={() => {}}
+              maxFiles={10}
+            />
+            <p className="text-xs text-muted-foreground">
+              Upload up to 10 images. Supported formats: JPEG, PNG, WEBP, GIF.
+              Max 5MB each.
+            </p>
+          </div>
 
           {/* Paid Toggle */}
           <form.Field name="isPaid">

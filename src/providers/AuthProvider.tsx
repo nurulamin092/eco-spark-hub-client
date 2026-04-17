@@ -13,7 +13,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: async () => {
       try {
@@ -92,8 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       register,
       logout,
+      refetch,
     }),
-    [data, isLoading, isAuthenticated, login, register, logout],
+    [data, isLoading, isAuthenticated, login, register, logout, refetch],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
