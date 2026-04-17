@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { voteService } from "../services/vote.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 import { VoteType } from "../types/vote.types";
 
 interface UseUserVoteResult {

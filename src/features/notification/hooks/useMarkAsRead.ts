@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { notificationService } from "../services/notification.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useMarkAsRead() {
   const queryClient = useQueryClient();

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { bookmarkService } from "../services/bookmark.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useIsBookmarked(ideaId: string) {
   return useQuery({

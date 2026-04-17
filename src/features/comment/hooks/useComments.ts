@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { commentService } from "../services/comment.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useComments(ideaId: string) {
   return useQuery({

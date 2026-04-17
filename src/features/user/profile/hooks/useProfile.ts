@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useProfile() {
   const { user, isLoading: isAuthLoading } = useAuth();

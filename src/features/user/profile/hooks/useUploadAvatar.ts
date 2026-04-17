@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { authService } from "@/features/auth/shared/services/auth.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 import { UploadAvatarResponse } from "@/features/auth/shared/types/auth.types";
 
 export function useUploadAvatar() {

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { notificationService } from "../services/notification.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useNotifications() {
   return useQuery({

@@ -10,7 +10,7 @@ import {
 } from "../schema/create-idea.schema";
 import { useCreateIdea } from "./useCreateIdea";
 import { ideaService } from "../../shared/services/idea.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useCreateIdeaForm() {
   const [serverError, setServerError] = useState<string | null>(null);

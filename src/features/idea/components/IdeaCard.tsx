@@ -17,7 +17,8 @@ import {
   ArrowDown,
   DollarSign,
 } from "lucide-react";
-import { formatNumber, truncateText } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/format";
+import { truncateText } from "@/features/admin/utils/adminHelpers";
 
 interface IdeaCardProps {
   idea: {

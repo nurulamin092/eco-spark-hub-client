@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ideaService } from "../../shared/services/idea.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 import { EditIdeaPayload } from "../types/edit-idea.types";
 
 export function useEditIdea(ideaId: string) {

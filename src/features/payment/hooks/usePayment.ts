@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { paymentService } from "../services/payment.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function usePayment() {
   return useQuery({

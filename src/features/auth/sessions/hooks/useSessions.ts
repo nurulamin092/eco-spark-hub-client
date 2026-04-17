@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { authService } from "../../shared/services/auth.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useSessions() {
   return useQuery({

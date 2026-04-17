@@ -10,6 +10,10 @@ export interface Category {
   order: number;
   createdAt: string;
   updatedAt: string;
+  _count?: {
+    ideas: number;
+    blogs?: number;
+  };
 }
 
 export interface CreateCategoryPayload {

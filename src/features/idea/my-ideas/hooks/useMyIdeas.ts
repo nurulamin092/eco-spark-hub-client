@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ideaService } from "../../shared/services/idea.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 import { MyIdeasFilters } from "../types/my-ideas.types";
 
 export function useMyIdeas(filters: MyIdeasFilters = {}) {

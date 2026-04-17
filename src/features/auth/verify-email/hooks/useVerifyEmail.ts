@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { authService } from "../../shared/services/auth.service";
 
 import { VerifyEmailFormValues } from "../schema/verify-email.schema";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useVerifyEmail() {
   const router = useRouter();

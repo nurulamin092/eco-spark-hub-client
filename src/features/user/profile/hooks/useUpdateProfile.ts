@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { authService } from "@/features/auth/shared/services/auth.service";
 
 import { ProfileFormValues } from "../schema/profile.schema";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient();

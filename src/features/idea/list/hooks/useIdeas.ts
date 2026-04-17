@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 import { ideaService } from "../../shared/services/idea.service";
 import { IdeaFilters, IdeasResponse } from "../../shared/types/idea.types";
 

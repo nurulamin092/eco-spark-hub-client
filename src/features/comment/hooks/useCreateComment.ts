@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { commentService } from "../services/comment.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 import { CreateCommentFormValues } from "../schemas/comment.schema";
 
 export function useCreateComment(ideaId: string) {

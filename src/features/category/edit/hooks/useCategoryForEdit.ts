@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { categoryService } from "../../shared/services/category.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useCategoryForEdit(categoryId: string) {
   return useQuery({

@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { categoryService } from "../../shared/services/category.service";
-import { queryKeys } from "@/lib/react-query/queryClient";
+import { queryKeys } from "@/lib/react-query/queryKeys";
 import { EditCategoryFormValues } from "../schema/edit-category.schema";
 
 export function useEditCategory(categoryId: string) {
