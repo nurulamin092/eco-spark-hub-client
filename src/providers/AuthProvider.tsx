@@ -1,102 +1,91 @@
 "use client";
 
-import { createContext, useMemo, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-
+import { authService, User } from "@/lib/services/auth.service";
 import { queryKeys } from "@/lib/react-query/queryKeys";
-import { AuthContextType } from "@/features/auth/shared/types/auth.types";
-import { authApi } from "@/lib/api/auth.api";
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined,
-);
+interface AuthContextValue {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // React Query দিয়ে ইউজার ডাটা ম্যানেজ করুন
   const { data, isLoading, refetch } = useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: async () => {
       try {
-        const res = await authApi.getMe();
-        return res.data;
+        const response = await authService.getMe();
+        setIsAuthenticated(true);
+        return response.data.user;
       } catch {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        setIsAuthenticated(false);
         return null;
       }
     },
-    retry: false,
     staleTime: 5 * 60 * 1000,
+    retry: false,
   });
-
-  const isAuthenticated = !isLoading && !!data?.user && !!data.user.id;
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const res = await authApi.login(email, password);
-
-      if (!res?.data?.accessToken) {
-        throw new Error("Login failed");
-      }
-
-      localStorage.setItem("accessToken", res.data.accessToken);
-
-      if (res.data.refreshToken) {
-        localStorage.setItem("refreshToken", res.data.refreshToken);
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.auth.me,
-      });
+      await authService.login({ email, password });
+      await refetch();
+      setIsAuthenticated(true);
     },
-    [queryClient],
+    [refetch],
   );
 
   const register = useCallback(
     async (name: string, email: string, password: string) => {
-      const res = await authApi.register(name, email, password);
-
-      if (!res?.data?.accessToken) {
-        throw new Error("Registration failed");
-      }
-
-      localStorage.setItem("accessToken", res.data.accessToken);
-
-      if (res.data.refreshToken) {
-        localStorage.setItem("refreshToken", res.data.refreshToken);
-      }
-
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.auth.me,
-      });
+      await authService.register({ name, email, password });
+      await refetch();
+      setIsAuthenticated(true);
     },
-    [queryClient],
+    [refetch],
   );
 
   const logout = useCallback(async () => {
-    try {
-      await authApi.logout();
-    } catch {}
-
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-
+    await authService.logout();
     queryClient.clear();
+    setIsAuthenticated(false);
   }, [queryClient]);
 
   const value = useMemo(
     () => ({
-      user: data?.user ?? null,
+      user: data ?? null,
       isLoading,
       isAuthenticated,
       login,
       register,
       logout,
-      refetch,
     }),
-    [data, isLoading, isAuthenticated, login, register, logout, refetch],
+    [data, isLoading, isAuthenticated, login, register, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return context;
 }
