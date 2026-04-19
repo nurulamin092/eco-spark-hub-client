@@ -1,40 +1,8 @@
-import { apiClient } from "@/lib/api/client";
-import { handleApiError, ApiError } from "@/lib/api/error-handler";
+import { handleApiError } from "@/lib/api/error-handler";
+import { apiClient } from "../api/base";
+import { AuthResponse, LoginPayload, RegisterPayload } from "../api/auth.api";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "MEMBER" | "ADMIN" | "SUPER_ADMIN";
-  image?: string | null;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  message: string;
-  data: {
-    user: User;
-  };
-}
-
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
-
-export interface RegisterPayload {
-  name: string;
-  email: string;
-  password: string;
-}
-
-/**
- * অথ এপিআই কল - টোকেন কুকিতে সংরক্ষিত হয়
- */
 export const authService = {
-  /**
-   * লগইন করুন - টোকেন সার্ভার সাইড কুকিতে সেট হবে
-   */
   login: async (payload: LoginPayload): Promise<AuthResponse> => {
     try {
       const response = await apiClient.post("/auth/login", payload);
@@ -44,9 +12,6 @@ export const authService = {
     }
   },
 
-  /**
-   * রেজিস্টার করুন
-   */
   register: async (payload: RegisterPayload): Promise<AuthResponse> => {
     try {
       const response = await apiClient.post("/auth/register", payload);
@@ -56,7 +21,6 @@ export const authService = {
     }
   },
 
- 
   logout: async (): Promise<void> => {
     try {
       await apiClient.post("/auth/logout");

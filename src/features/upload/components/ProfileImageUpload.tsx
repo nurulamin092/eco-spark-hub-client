@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 
 export function ProfileImageUpload() {
-  const { user, refetch } = useAuth();
+  const { user, refetchUser } = useAuth();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,7 +50,7 @@ export function ProfileImageUpload() {
 
       try {
         await mutateAsync(file);
-        await refetch();
+        await refetchUser();
         toast.success("Profile picture updated successfully");
         setPreviewUrl(null);
       } catch (error) {
@@ -61,7 +61,7 @@ export function ProfileImageUpload() {
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     },
-    [mutateAsync, refetch],
+    [mutateAsync, refetchUser],
   );
 
   const avatarUrl = previewUrl || user?.image || undefined;

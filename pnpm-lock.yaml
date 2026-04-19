@@ -49,6 +49,9 @@ importers:
           link:tanstack/react-form/validators
         version: |
           link:tanstack/react-form/validators
+      jose:
+        specifier: ^6.2.2
+        version: 6.2.2
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3

@@ -13,7 +13,7 @@ export function useLoginMutation() {
 
   return useMutation({
     mutationFn: async (values: LoginFormValues) => {
-      await login(values.email, values.password);
+      login(values.email, values.password);
     },
     onSuccess: () => {
       toast.success("Login successful!");

@@ -2,14 +2,37 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "MEMBER" | "ADMIN" | "SUPER_ADMIN";
-  image?: string | null;
+  role: "SUPER_ADMIN" | "ADMIN" | "MODERATOR" | "MEMBER";
+  status: "ACTIVE" | "BLOCKED" | "DELETED";
   emailVerified: boolean;
-  bio?: string;
-  phone?: string;
-  address?: string;
+  image?: string | null;
+  bio?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  needPasswordChange?: boolean;
+  isDeleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
+// ============ ADD MISSING PAYLOAD TYPES ============
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
+// ============ EXISTING TYPES ============
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -61,6 +84,7 @@ export interface ResendOtpResponse {
     resendAt: string;
   };
 }
+
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
@@ -76,6 +100,7 @@ export interface AuthRedirectFooterProps {
   linkText: string;
   href: string;
 }
+
 export interface ForgotPasswordResponse {
   success: boolean;
   message: string;
@@ -124,6 +149,7 @@ export interface DeleteAccountResponse {
   success: boolean;
   message: string;
 }
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
