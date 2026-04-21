@@ -20,10 +20,7 @@ export interface TopIdea {
   title: string;
   upvoteCount: number;
   viewCount: number;
-  author: {
-    name: string;
-    email: string;
-  };
+  author: { name: string; email: string };
 }
 
 export interface PendingIdea {
@@ -31,15 +28,8 @@ export interface PendingIdea {
   title: string;
   status: string;
   createdAt: string;
-  author: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  category: {
-    id: string;
-    name: string;
-  };
+  author: { id: string; name: string; email: string };
+  category: { id: string; name: string };
 }
 
 export interface RecentReport {
@@ -47,18 +37,9 @@ export interface RecentReport {
   reason: string;
   status: string;
   createdAt: string;
-  reporter: {
-    name: string;
-    email: string;
-  };
-  idea?: {
-    id: string;
-    title: string;
-  };
-  comment?: {
-    id: string;
-    content: string;
-  };
+  reporter: { name: string; email: string };
+  idea?: { id: string; title: string };
+  comment?: { id: string; content: string };
 }
 
 export interface MemberGrowth {
@@ -83,64 +64,20 @@ export interface SystemHealth {
   timestamp: string;
 }
 
-export interface DashboardResponse {
+export interface FullDashboardData {
+  stats: DashboardStats;
+  analytics: GrowthAnalytics;
+  topIdeas: TopIdea[];
+  reports: RecentReport[];
+  pendingIdeas: PendingIdea[];
+  recentActivities: unknown[];
+  memberGrowth: MemberGrowth;
+  categoryStats: CategoryStat[];
+  systemHealth: SystemHealth;
+}
+
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
-  data: {
-    stats: DashboardStats;
-    analytics: GrowthAnalytics;
-    topIdeas: TopIdea[];
-    pendingIdeas: PendingIdea[];
-    recentReports: RecentReport[];
-    memberGrowth: MemberGrowth;
-    categoryStats: CategoryStat[];
-    systemHealth: SystemHealth;
-  };
-}
-
-export interface ApproveIdeaResponse {
-  success: boolean;
-  message: string;
-  data: {
-    id: string;
-    status: string;
-  };
-}
-
-export interface RejectIdeaResponse {
-  success: boolean;
-  message: string;
-  data: {
-    id: string;
-    status: string;
-    adminFeedback: string;
-  };
-}
-
-export interface BulkActionResponse {
-  success: boolean;
-  message: string;
-  data: {
-    count: number;
-  };
-}
-
-export interface PendingIdeasFilters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  category?: string;
-  sortBy?: "createdAt" | "updatedAt";
-  sortOrder?: "asc" | "desc";
-}
-
-export interface TopIdeasFilters {
-  limit?: number;
-  timeRange?: "week" | "month" | "all";
-}
-export interface ReportsFilters {
-  page?: number;
-  limit?: number;
-  status?: string;
-  type?: string;
+  data: T;
 }

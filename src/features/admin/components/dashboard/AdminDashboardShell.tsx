@@ -1,14 +1,14 @@
+// ============ src/features/admin/components/dashboard/AdminDashboardShell.tsx ============
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useAdminDashboard } from "../../hooks/useAdminDashboard";
-import { StatsGrid } from "./StatsGrid/StatsGrid";
-import { GrowthChart } from "./Charts/GrowthChart";
-import { RevenueChart } from "./Charts/RevenueChart";
+import { StatsGrid } from "./stats/StatsGrid";
+import { GrowthChart, RevenueChart } from "./charts";
+import { PendingIdeasTable, TopIdeasTable } from "./tables";
 import { RecentReportsTable } from "../reports/RecentReportsTable";
-import { SystemHealthWidget } from "./SystemHealth/SystemHealthWidget";
-import { PendingIdeasTable, TopIdeasTable } from "../..";
+import { SystemHealthWidget } from "./health/SystemHealthWidget";
 
 const defaultStats = {
   users: 0,

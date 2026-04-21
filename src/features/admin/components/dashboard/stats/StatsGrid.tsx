@@ -1,3 +1,4 @@
+// ============ src/features/admin/components/dashboard/stats/StatsGrid.tsx ============
 "use client";
 
 import {
@@ -11,10 +12,10 @@ import {
 } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { StatsSkeleton } from "./StatsSkeleton";
-import { DashboardStats } from "../../../types/admin.types";
+import type { DashboardStats } from "../../../types/admin.types";
 
 interface StatsGridProps {
-  stats: DashboardStats; // ✅ This expects only DashboardStats
+  stats: DashboardStats;
   isLoading?: boolean;
 }
 

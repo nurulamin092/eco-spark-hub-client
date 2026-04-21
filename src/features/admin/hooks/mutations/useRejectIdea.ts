@@ -3,7 +3,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { adminIdeasService } from "../../services/adminIdeas.service";
-import { ADMIN_QUERY_KEYS } from "../../constants";
+
+export const ADMIN_QUERY_KEYS = {
+  PENDING_IDEAS: "admin-pending-ideas",
+  STATS: "admin-stats",
+} as const;
 
 export function useRejectIdea() {
   const queryClient = useQueryClient();
@@ -27,7 +31,7 @@ export function useRejectIdea() {
         queryKey: [ADMIN_QUERY_KEYS.PENDING_IDEAS],
       });
       queryClient.invalidateQueries({ queryKey: [ADMIN_QUERY_KEYS.STATS] });
-      toast.success("Idea rejected");
+      toast.success("Idea rejected successfully");
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to reject idea");

@@ -1,54 +1,38 @@
 "use client";
 
-import { useAdminStats } from "./queries/useAdminStats";
-import { usePendingIdeas } from "./queries/usePendingIdeas";
-import { useTopIdeas } from "./queries/useTopIdeas";
-import { useRecentReports } from "./queries/useRecentReports";
-import { useSystemHealth } from "./queries/useSystemHealth";
+import { useQuery } from "@tanstack/react-query";
+import { adminService } from "../services/admin.service";
+
+export const ADMIN_QUERY_KEYS = {
+  dashboard: "admin-dashboard",
+} as const;
 
 export function useAdminDashboard() {
   const {
     data: dashboardData,
-    isLoading: statsLoading,
-    error: statsError,
-    refetch: refetchStats,
-  } = useAdminStats();
-  const {
-    data: pendingIdeas,
-    isLoading: pendingLoading,
-    refetch: refetchPending,
-  } = usePendingIdeas();
-  const { data: topIdeas, isLoading: topLoading } = useTopIdeas();
-  const { data: recentReports, isLoading: reportsLoading } = useRecentReports();
-  const { data: systemHealth, isLoading: healthLoading } = useSystemHealth();
-
-  const isLoading =
-    statsLoading ||
-    pendingLoading ||
-    topLoading ||
-    reportsLoading ||
-    healthLoading;
-  const error = statsError;
-
-  const stats = dashboardData?.stats;
-  const analytics = dashboardData?.analytics;
-  const memberGrowth = dashboardData?.memberGrowth;
-  const categoryStats = dashboardData?.categoryStats;
-
-  return {
-    stats,
-    analytics,
-    pendingIdeas,
-    topIdeas,
-    recentReports,
-    memberGrowth,
-    categoryStats,
-    systemHealth,
     isLoading,
     error,
-    refetch: () => {
-      refetchStats();
-      refetchPending();
-    },
+    refetch,
+  } = useQuery({
+    queryKey: [ADMIN_QUERY_KEYS.dashboard],
+    queryFn: () => adminService.getFullDashboard(),
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    retry: 1,
+    retryDelay: 1000,
+  });
+
+  return {
+    stats: dashboardData?.stats,
+    analytics: dashboardData?.analytics,
+    pendingIdeas: dashboardData?.pendingIdeas,
+    topIdeas: dashboardData?.topIdeas,
+    recentReports: dashboardData?.reports,
+    memberGrowth: dashboardData?.memberGrowth,
+    categoryStats: dashboardData?.categoryStats,
+    systemHealth: dashboardData?.systemHealth,
+    isLoading,
+    error,
+    refetch,
   };
 }

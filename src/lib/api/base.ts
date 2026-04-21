@@ -1,4 +1,4 @@
-// ============ src/lib/api/base.ts (FIXED - Single source of truth) ============
+// ============ src/lib/api/base.ts ============
 import axios, {
   AxiosInstance,
   InternalAxiosRequestConfig,
@@ -24,7 +24,7 @@ class ApiClient {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      withCredentials: true, // Important for cookies
+      withCredentials: true,
       timeout: 15000,
     });
 
@@ -42,7 +42,10 @@ class ApiClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
+        // Only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
+        }
 
         // Add CSRF token if available
         if (typeof document !== "undefined") {
@@ -65,9 +68,12 @@ class ApiClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response) => {
-        console.log(`📥 ${response.status} ${response.config.url}`);
+        // Only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.log(`📥 ${response.status} ${response.config.url}`);
+        }
 
-        // IMPORTANT: Save tokens from login response to cookies
+        // Save tokens from login/register response
         if (
           response.config.url?.includes("/auth/login") ||
           response.config.url?.includes("/auth/register")
@@ -97,7 +103,7 @@ class ApiClient {
           return Promise.reject(error);
         }
 
-        // Only attempt refresh on 401 and not already retried
+        // Handle 401 - Token refresh
         if (
           error.response?.status === 401 &&
           !originalRequest._retry &&
@@ -132,18 +138,37 @@ class ApiClient {
   ): void {
     if (typeof document === "undefined") return;
 
+    const isProduction = process.env.NODE_ENV === "production";
+    const cookieOptions = `path=/; max-age=900; ${
+      isProduction ? "Secure; " : ""
+    }SameSite=Lax`;
+
     // Save access token
-    document.cookie = `accessToken=${accessToken}; path=/; max-age=900; SameSite=Lax`;
+    document.cookie = `accessToken=${accessToken}; ${cookieOptions}`;
 
     // Save refresh token
-    document.cookie = `refreshToken=${refreshToken}; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `refreshToken=${refreshToken}; path=/; max-age=604800; ${
+      isProduction ? "Secure; " : ""
+    }SameSite=Lax`;
 
     // Save session token if exists
     if (sessionToken) {
-      document.cookie = `better-auth.session_token=${sessionToken}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `better-auth.session_token=${sessionToken}; path=/; max-age=86400; ${
+        isProduction ? "Secure; " : ""
+      }SameSite=Lax`;
     }
 
-    console.log("Tokens saved to cookies");
+    // Extract and save user role
+    try {
+      const payload = JSON.parse(atob(accessToken.split(".")[1]));
+      if (payload.role) {
+        document.cookie = `userRole=${payload.role}; ${cookieOptions}`;
+      }
+    } catch {
+      // Silent fail - not critical
+    }
+
+    console.log("✅ Tokens saved to cookies");
   }
 
   private async refreshTokens(): Promise<string | null> {
@@ -166,7 +191,11 @@ class ApiClient {
 
       if (newAccessToken) {
         // Update cookie with new token
-        document.cookie = `accessToken=${newAccessToken}; path=/; max-age=900; SameSite=Lax`;
+        const isProduction = process.env.NODE_ENV === "production";
+        document.cookie = `accessToken=${newAccessToken}; path=/; max-age=900; ${
+          isProduction ? "Secure; " : ""
+        }SameSite=Lax`;
+
         this.processQueue(null, newAccessToken);
       } else {
         throw new Error("No access token received");
@@ -199,6 +228,7 @@ class ApiClient {
         "accessToken",
         "refreshToken",
         "better-auth.session_token",
+        "userRole",
       ];
       cookies.forEach((name) => {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;

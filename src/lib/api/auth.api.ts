@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiClient } from "./base";
 // Import types from single source of truth
 import type {
@@ -48,10 +49,41 @@ class AuthApiService {
     }
   }
 
+  //?=============================
+
   async getMe(): Promise<User> {
-    const response = await apiClient.get("/auth/me");
-    return response.data.data;
+    try {
+      const response = await apiClient.get("/auth/me");
+
+      // Handle different response structures
+      if (response.data?.data) {
+        return response.data.data;
+      }
+      if (response.data?.user) {
+        return response.data.user;
+      }
+      if (response.data) {
+        return response.data;
+      }
+
+      throw new Error("Invalid response structure");
+    } catch (error: any) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message || error.message;
+
+      // Log only in development and not for 429
+      if (process.env.NODE_ENV === "development" && status !== 429) {
+        console.warn(`getMe failed (${status}):`, message);
+      }
+
+      // Create a meaningful error
+      const customError = new Error(message);
+      (customError as any).status = status;
+      throw customError;
+    }
   }
+
+  //?.=======================
 
   async changePassword(payload: ChangePasswordPayload): Promise<void> {
     await apiClient.post("/auth/change-password", payload);

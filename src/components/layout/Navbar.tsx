@@ -1,119 +1,71 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-import { Button } from "@/components/ui/button";
-import { Leaf, Menu, X } from "lucide-react";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { useState } from "react";
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
-import { NotificationBell } from "@/features/notification";
-
-const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/ideas", label: "Ideas" },
-  { href: "/about", label: "About" },
-];
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Bell, LogOut, Settings, User } from "lucide-react";
+import Link from "next/link";
 
 export function Navbar() {
-  const pathname = usePathname();
-  const { user, isAuthenticated, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const initials = user?.name?.charAt(0).toUpperCase() || "U";
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Leaf className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl">EcoSpark Hub</span>
-        </Link>
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center gap-4 ml-auto">
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
+        </Button>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`text-sm hover:text-primary ${pathname === item.href ? "text-primary font-medium" : "text-muted-foreground"}`}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="hidden md:flex items-center gap-4">
-          <ThemeToggle />
-          {isAuthenticated ? (
-            <>
-              <Link href={user?.role === "ADMIN" ? "/admin" : "/member"}>
-                <Button variant="ghost" size="sm">
-                  Dashboard
-                </Button>
-              </Link>
-              <Button variant="ghost" size="sm" onClick={logout}>
-                Logout
-              </Button>
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-sm font-medium">
-                  {user?.name?.charAt(0)}
-                </span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.image || undefined} />
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{user?.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email}
+                </p>
               </div>
-            </>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button variant="ghost" size="sm">
-                  Login
-                </Button>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/member/profile">
+                <User className="mr-2 h-4 w-4" />
+                Profile
               </Link>
-              <Link href="/register">
-                <Button size="sm">Sign Up</Button>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/member/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
               </Link>
-            </>
-          )}
-        </div>
-
-        {/* Mobile */}
-        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X /> : <Menu />}
-        </button>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => logout()}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-
-      {isOpen && (
-        <div className="md:hidden border-t p-4 flex flex-col gap-3">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setIsOpen(false)}
-              className="text-sm hover:text-primary"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <div className="pt-2 flex items-center justify-between">
-            <ThemeToggle />
-            <NotificationBell />
-            {isAuthenticated ? (
-              <Button variant="ghost" size="sm" onClick={logout}>
-                Logout
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button size="sm">Sign Up</Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </nav>
+    </div>
   );
 }
