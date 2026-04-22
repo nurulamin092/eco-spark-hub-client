@@ -16,7 +16,12 @@ export const queryKeys = {
     featured: (limit?: number) => ["ideas", "featured", limit] as const,
   },
   categories: {
-    all: ["categories", "all"] as const,
+    all: ["categories"] as const,
+    lists: () => [...queryKeys.categories.all, "list"] as const,
+    list: (filters?: any) =>
+      [...queryKeys.categories.lists(), filters] as const,
+    details: () => [...queryKeys.categories.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.categories.details(), id] as const,
   },
   votes: {
     userVote: (ideaId: string) => ["votes", "user", ideaId] as const,

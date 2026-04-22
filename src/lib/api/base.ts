@@ -42,21 +42,9 @@ class ApiClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // Only log in development
         if (process.env.NODE_ENV === "development") {
           console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
         }
-
-        // Add CSRF token if available
-        if (typeof document !== "undefined") {
-          const csrfToken = document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute("content");
-          if (csrfToken) {
-            config.headers["X-CSRF-Token"] = csrfToken;
-          }
-        }
-
         return config;
       },
       (error) => {
@@ -68,7 +56,6 @@ class ApiClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response) => {
-        // Only log in development
         if (process.env.NODE_ENV === "development") {
           console.log(`📥 ${response.status} ${response.config.url}`);
         }
@@ -98,12 +85,10 @@ class ApiClient {
         const isAuthEndpoint = originalRequest.url?.includes("/auth/");
         const isLoginEndpoint = originalRequest.url?.includes("/auth/login");
 
-        // Don't retry login failures
         if (isLoginEndpoint && error.response?.status === 401) {
           return Promise.reject(error);
         }
 
-        // Handle 401 - Token refresh
         if (
           error.response?.status === 401 &&
           !originalRequest._retry &&
@@ -120,7 +105,6 @@ class ApiClient {
           }
         }
 
-        // Handle network errors
         if (error.code === "ERR_NETWORK") {
           console.error("Network error - backend might be down");
           return Promise.reject(new Error("Unable to connect to server"));
@@ -142,33 +126,34 @@ class ApiClient {
     const cookieOptions = `path=/; max-age=900; ${
       isProduction ? "Secure; " : ""
     }SameSite=Lax`;
-
-    // Save access token
-    document.cookie = `accessToken=${accessToken}; ${cookieOptions}`;
-
-    // Save refresh token
-    document.cookie = `refreshToken=${refreshToken}; path=/; max-age=604800; ${
+    const longCookieOptions = `path=/; max-age=604800; ${
       isProduction ? "Secure; " : ""
     }SameSite=Lax`;
 
-    // Save session token if exists
+    document.cookie = `accessToken=${accessToken}; ${cookieOptions}`;
+    document.cookie = `refreshToken=${refreshToken}; ${longCookieOptions}`;
+
     if (sessionToken) {
       document.cookie = `better-auth.session_token=${sessionToken}; path=/; max-age=86400; ${
         isProduction ? "Secure; " : ""
       }SameSite=Lax`;
     }
 
-    // Extract and save user role
+    // Extract and save user role - CRITICAL
     try {
       const payload = JSON.parse(atob(accessToken.split(".")[1]));
       if (payload.role) {
         document.cookie = `userRole=${payload.role}; ${cookieOptions}`;
+        console.log(`✅ [base.ts] userRole cookie set to: ${payload.role}`);
+      } else {
+        console.warn("[base.ts] No role found in token payload");
       }
-    } catch {
-      // Silent fail - not critical
+    } catch (error) {
+      console.error("[base.ts] Failed to extract user role:", error);
     }
 
-    console.log("✅ Tokens saved to cookies");
+    console.log("[base.ts] All tokens saved to cookies");
+    console.log("[base.ts] Current cookies:", document.cookie);
   }
 
   private async refreshTokens(): Promise<string | null> {
@@ -190,7 +175,6 @@ class ApiClient {
       const newAccessToken = response.data?.data?.accessToken ?? null;
 
       if (newAccessToken) {
-        // Update cookie with new token
         const isProduction = process.env.NODE_ENV === "production";
         document.cookie = `accessToken=${newAccessToken}; path=/; max-age=900; ${
           isProduction ? "Secure; " : ""
@@ -223,7 +207,6 @@ class ApiClient {
 
   private clearAuthAndRedirect(): void {
     if (typeof window !== "undefined") {
-      // Clear all auth cookies
       const cookies = [
         "accessToken",
         "refreshToken",
@@ -233,7 +216,6 @@ class ApiClient {
       cookies.forEach((name) => {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
       });
-
       window.location.href = "/login";
     }
   }

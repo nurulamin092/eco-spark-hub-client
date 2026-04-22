@@ -10,12 +10,12 @@ export default function AdminLoading() {
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Skeleton className="h-[300px] rounded-lg" />
-        <Skeleton className="h-[300px] rounded-lg" />
+        <Skeleton className="h-75 rounded-lg" />
+        <Skeleton className="h-75 rounded-lg" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Skeleton className="h-[500px] rounded-lg" />
-        <Skeleton className="h-[500px] rounded-lg" />
+        <Skeleton className="h-125 rounded-lg" />
+        <Skeleton className="h-125 rounded-lg" />
       </div>
     </div>
   );

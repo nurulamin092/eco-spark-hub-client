@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// ============ src/lib/api/auth.api.ts ============
 import { apiClient } from "./base";
-// Import types from single source of truth
 import type {
   User,
   AuthResponse,
@@ -10,7 +10,6 @@ import type {
   UpdateProfileRequest,
 } from "@/features/auth/shared/types/auth.types";
 
-// Re-export for convenience (optional)
 export type {
   User,
   AuthResponse,
@@ -32,7 +31,9 @@ class AuthApiService {
   }
 
   async login(payload: LoginPayload): Promise<AuthResponse> {
+    console.log("📤 [auth.api] Login request for:", payload.email);
     const response = await apiClient.post("/auth/login", payload);
+    console.log("📥 [auth.api] Login response status:", response.status);
     return response.data;
   }
 
@@ -44,18 +45,17 @@ class AuthApiService {
   async logout(): Promise<void> {
     try {
       await apiClient.post("/auth/logout");
+      console.log("✅ [auth.api] Logout successful");
     } catch (error) {
       console.error("Logout error:", error);
     }
   }
 
-  //?=============================
-
   async getMe(): Promise<User> {
     try {
+      console.log("📤 [auth.api] Getting current user...");
       const response = await apiClient.get("/auth/me");
 
-      // Handle different response structures
       if (response.data?.data) {
         return response.data.data;
       }
@@ -69,21 +69,10 @@ class AuthApiService {
       throw new Error("Invalid response structure");
     } catch (error: any) {
       const status = error.response?.status;
-      const message = error.response?.data?.message || error.message;
-
-      // Log only in development and not for 429
-      if (process.env.NODE_ENV === "development" && status !== 429) {
-        console.warn(`getMe failed (${status}):`, message);
-      }
-
-      // Create a meaningful error
-      const customError = new Error(message);
-      (customError as any).status = status;
-      throw customError;
+      console.log(`📥 [auth.api] getMe failed with status: ${status}`);
+      throw error;
     }
   }
-
-  //?.=======================
 
   async changePassword(payload: ChangePasswordPayload): Promise<void> {
     await apiClient.post("/auth/change-password", payload);

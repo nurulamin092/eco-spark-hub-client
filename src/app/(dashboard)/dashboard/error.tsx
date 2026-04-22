@@ -17,7 +17,7 @@ export default function AdminError({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+    <div className="flex flex-col items-center justify-center min-h-100 space-y-4">
       <AlertCircle className="h-12 w-12 text-red-500" />
       <h2 className="text-2xl font-semibold">Something went wrong!</h2>
       <p className="text-muted-foreground text-center max-w-md">

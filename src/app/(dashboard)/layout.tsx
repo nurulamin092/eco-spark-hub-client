@@ -21,7 +21,6 @@ export default function DashboardLayout({
   useEffect(() => {
     if (isLoading) return;
 
-    // If error or no user, redirect to login
     if (error || !user) {
       router.push(`/login?redirect=${pathname}`);
     }

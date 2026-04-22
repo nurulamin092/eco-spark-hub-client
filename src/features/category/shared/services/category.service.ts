@@ -1,38 +1,73 @@
+// ============ src/features/category/shared/services/category.service.ts ============
 import { apiClient } from "@/lib/api/base";
-import {
+import type {
+  Category,
   CreateCategoryPayload,
   UpdateCategoryPayload,
-  CategoriesResponse,
-  CategoryResponse,
-  DeleteCategoryResponse,
+  ApiResponse,
 } from "../types/category.types";
 
-export const categoryService = {
-  getAll: async (): Promise<CategoriesResponse> => {
-    const response = await apiClient.get("/categories");
-    return response.data;
-  },
+class CategoryService {
+  private static instance: CategoryService;
 
-  getById: async (id: string): Promise<CategoryResponse> => {
-    const response = await apiClient.get(`/categories/${id}`);
-    return response.data;
-  },
+  private constructor() {}
 
-  create: async (payload: CreateCategoryPayload): Promise<CategoryResponse> => {
-    const response = await apiClient.post("/categories", payload);
-    return response.data;
-  },
+  static getInstance(): CategoryService {
+    if (!CategoryService.instance) {
+      CategoryService.instance = new CategoryService();
+    }
+    return CategoryService.instance;
+  }
 
-  update: async (
-    id: string,
-    payload: UpdateCategoryPayload,
-  ): Promise<CategoryResponse> => {
-    const response = await apiClient.patch(`/categories/${id}`, payload);
-    return response.data;
-  },
+  async getAll(): Promise<Category[]> {
+    console.log("📡 [categoryService] GET /categories");
+    const response =
+      await apiClient.get<ApiResponse<Category[]>>("/categories");
+    console.log("📡 [categoryService] Response:", response.data);
+    return response.data.data;
+  }
 
-  delete: async (id: string): Promise<DeleteCategoryResponse> => {
-    const response = await apiClient.delete(`/categories/${id}`);
+  async getById(id: string): Promise<Category> {
+    console.log(`📡 [categoryService] GET /categories/${id}`);
+    // ✅ Make sure URL is correct - no double /api/v1
+    const response = await apiClient.get<ApiResponse<Category>>(
+      `/categories/${id}`,
+    );
+    console.log("📡 [categoryService] Response status:", response.status);
+    console.log("📡 [categoryService] Response data:", response.data);
+
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || "Failed to fetch category");
+    }
+
+    return response.data.data;
+  }
+
+  async create(payload: CreateCategoryPayload): Promise<ApiResponse<Category>> {
+    const response = await apiClient.post<ApiResponse<Category>>(
+      "/categories",
+      payload,
+    );
     return response.data;
-  },
-};
+  }
+  async update(id: string, payload: UpdateCategoryPayload): Promise<Category> {
+    console.log(`📡 [categoryService] PATCH /categories/${id}`, payload);
+    const response = await apiClient.patch<ApiResponse<Category>>(
+      `/categories/${id}`,
+      payload,
+    );
+    console.log("📡 [categoryService] Update response:", response.data);
+
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || "Failed to update category");
+    }
+
+    return response.data.data;
+  }
+
+  async delete(id: string): Promise<void> {
+    await apiClient.delete(`/categories/${id}`);
+  }
+}
+
+export const categoryService = CategoryService.getInstance();

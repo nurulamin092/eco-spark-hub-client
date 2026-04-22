@@ -1,17 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// ============ src/features/category/create/hooks/useCreateCategory.ts ============
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { categoryService } from "../../shared/services/category.service";
-import { queryKeys } from "@/lib/react-query/queryKeys";
-import { CreateCategoryFormValues } from "../schema/create-category.schema";
+import type { CreateCategoryPayload } from "../../shared/types/category.types";
+
+const CATEGORY_QUERY_KEYS = {
+  all: ["categories"] as const,
+  lists: () => [...CATEGORY_QUERY_KEYS.all, "list"] as const,
+};
 
 export function useCreateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: CreateCategoryFormValues) => {
+    mutationFn: async (payload: CreateCategoryPayload) => {
       const response = await categoryService.create(payload);
       if (!response.success) {
         throw new Error(response.message);
@@ -19,15 +23,11 @@ export function useCreateCategory() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.categories.all });
+      queryClient.invalidateQueries({ queryKey: CATEGORY_QUERY_KEYS.lists() });
       toast.success("Category created successfully");
     },
-    onError: (error: any) => {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to create category";
-      toast.error(errorMessage);
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to create category");
     },
   });
 }

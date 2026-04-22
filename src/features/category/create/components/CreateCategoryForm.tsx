@@ -1,28 +1,42 @@
+// ============ src/features/category/create/components/CreateCategoryForm.tsx ============
 "use client";
 
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, ArrowLeft } from "lucide-react";
-import { useCreateCategory } from "../hooks/useCreateCategory";
 import {
-  createCategorySchema,
-  CreateCategoryFormValues,
-} from "../schema/create-category.schema";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+
+import { useCreateCategory } from "../hooks/useCreateCategory";
+import type { CreateCategoryFormValues } from "../../shared/schemas/category.schema";
+import type { CreateCategoryPayload } from "../../shared/types/category.types";
+
+// Helper to convert form values to API payload
+function toApiPayload(
+  formValues: CreateCategoryFormValues,
+): CreateCategoryPayload {
+  return {
+    name: formValues.name,
+    description: formValues.description ?? undefined,
+    icon: formValues.icon ?? undefined,
+    color: formValues.color ?? undefined,
+  };
+}
 
 export function CreateCategoryForm() {
   const router = useRouter();
-  const { mutateAsync, isPending } = useCreateCategory();
+  const { mutateAsync, isPending: isMutating } = useCreateCategory();
 
   const form = useForm({
     defaultValues: {
@@ -32,26 +46,20 @@ export function CreateCategoryForm() {
       color: "",
     } as CreateCategoryFormValues,
     onSubmit: async ({ value }) => {
-      await mutateAsync(value);
-      router.push("/admin/categories");
-    },
-    validators: {
-      onChange: ({ value }) => {
-        const result = createCategorySchema.safeParse(value);
-        if (!result.success) {
-          const errors: Record<string, string> = {};
-          result.error.issues.forEach((issue) => {
-            const path = issue.path[0];
-            if (path && typeof path === "string") {
-              errors[path] = issue.message;
-            }
-          });
-          return errors;
-        }
-        return undefined;
-      },
+      try {
+        const payload = toApiPayload(value);
+        await mutateAsync(payload);
+        toast.success("Category created successfully");
+        router.push("/admin/categories");
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to create category";
+        toast.error(message);
+      }
     },
   });
+
+  const isPending = isMutating || form.state.isSubmitting;
 
   return (
     <Card className="max-w-2xl mx-auto">
@@ -59,6 +67,7 @@ export function CreateCategoryForm() {
         <CardTitle>Create Category</CardTitle>
         <CardDescription>Add a new category for ideas</CardDescription>
       </CardHeader>
+
       <CardContent>
         <form
           onSubmit={(e) => {
@@ -66,7 +75,7 @@ export function CreateCategoryForm() {
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-4"
+          className="space-y-5"
         >
           <form.Field name="name">
             {(field) => (
@@ -74,15 +83,17 @@ export function CreateCategoryForm() {
                 <Label htmlFor={field.name}>Name *</Label>
                 <Input
                   id={field.name}
+                  name={field.name}
                   value={field.state.value}
-                  onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder="e.g. Renewable Energy"
                   disabled={isPending}
-                  placeholder="e.g., Renewable Energy"
+                  aria-invalid={field.state.meta.errors.length > 0}
                 />
-                {field.state.meta.errors.map((err) => (
-                  <p key={err} className="text-sm text-destructive">
-                    {err}
+                {field.state.meta.errors.map((error, index) => (
+                  <p key={index} className="text-sm text-destructive">
+                    {error}
                   </p>
                 ))}
               </div>
@@ -95,12 +106,13 @@ export function CreateCategoryForm() {
                 <Label htmlFor={field.name}>Description</Label>
                 <Textarea
                   id={field.name}
-                  value={field.state.value || ""}
-                  onBlur={field.handleBlur}
+                  name={field.name}
+                  value={field.state.value ?? ""}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  disabled={isPending}
-                  placeholder="Brief description of this category"
+                  onBlur={field.handleBlur}
                   rows={3}
+                  placeholder="Brief description (optional)"
+                  disabled={isPending}
                 />
               </div>
             )}
@@ -113,11 +125,12 @@ export function CreateCategoryForm() {
                   <Label htmlFor={field.name}>Icon (Emoji)</Label>
                   <Input
                     id={field.name}
-                    value={field.state.value || ""}
-                    onBlur={field.handleBlur}
+                    name={field.name}
+                    value={field.state.value ?? ""}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    disabled={isPending}
+                    onBlur={field.handleBlur}
                     placeholder="🌱"
+                    disabled={isPending}
                   />
                 </div>
               )}
@@ -127,22 +140,30 @@ export function CreateCategoryForm() {
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Color (Hex)</Label>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <Input
                       id={field.name}
-                      value={field.state.value || ""}
-                      onBlur={field.handleBlur}
+                      name={field.name}
+                      value={field.state.value ?? ""}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      disabled={isPending}
+                      onBlur={field.handleBlur}
                       placeholder="#10b981"
+                      disabled={isPending}
+                      className="flex-1"
                     />
                     {field.state.value && (
                       <div
-                        className="w-10 h-10 rounded border"
+                        className="h-10 w-10 rounded-md border shadow-sm"
                         style={{ backgroundColor: field.state.value }}
+                        aria-label="Color preview"
                       />
                     )}
                   </div>
+                  {field.state.meta.errors.map((error, index) => (
+                    <p key={index} className="text-sm text-destructive">
+                      {error}
+                    </p>
+                  ))}
                 </div>
               )}
             </form.Field>
@@ -158,22 +179,11 @@ export function CreateCategoryForm() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            <form.Subscribe
-              selector={(state) => [state.canSubmit, state.isSubmitting]}
-            >
-              {([canSubmit]) => (
-                <Button type="submit" disabled={!canSubmit || isPending}>
-                  {isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Category"
-                  )}
-                </Button>
-              )}
-            </form.Subscribe>
+
+            <Button type="submit" disabled={isPending || !form.state.canSubmit}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Category
+            </Button>
           </div>
         </form>
       </CardContent>

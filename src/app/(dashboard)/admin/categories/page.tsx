@@ -1,9 +1,10 @@
-import { CategoryList } from "@/features/category/list/components/CategoryList";
+// ============ src/app/(dashboard)/admin/categories/page.tsx ============
+import { Metadata } from "next";
+import { requireAdmin } from "@/lib/api/auth.guard";
+import { CategoryList } from "@/features/category/components/CategoryList";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Metadata } from "next";
-import { requireAdmin } from "@/lib/api/auth.guard";
 
 export const metadata: Metadata = {
   title: "Categories | Admin Dashboard",

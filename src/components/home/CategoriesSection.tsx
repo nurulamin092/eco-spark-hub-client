@@ -1,12 +1,13 @@
+// ============ src/components/home/CategoriesSection.tsx ============
 "use client";
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { categoryService } from "@/features/category/shared/services/category.service";
-import { queryKeys } from "@/lib/react-query/queryKeys";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Grid3X3 } from "lucide-react";
 
+// Default icons for categories based on name
 const categoryIcons: Record<string, string> = {
   Energy: "⚡",
   Waste: "🗑️",
@@ -16,15 +17,20 @@ const categoryIcons: Record<string, string> = {
   Biodiversity: "🌿",
   Education: "📚",
   Technology: "💻",
+  "Waste Management": "🗑️",
+  "Water Conservation": "💧",
+  Agriculture: "🌾",
+  Recycling: "♻️",
+  "Climate Action": "🌍",
+  "Urban Planning": "🏙️",
 };
 
 export function CategoriesSection() {
-  const { data, isLoading } = useQuery({
-    queryKey: queryKeys.categories.all,
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ["categories", "list"],
     queryFn: () => categoryService.getAll(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  const categories = data?.data || [];
 
   if (isLoading) {
     return (
@@ -39,7 +45,7 @@ export function CategoriesSection() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <Skeleton key={i} className="h-24 rounded-xl" />
             ))}
           </div>
@@ -47,6 +53,13 @@ export function CategoriesSection() {
       </section>
     );
   }
+
+  if (!categories || categories.length === 0) {
+    return null;
+  }
+
+  // Take only first 8 categories
+  const displayCategories = categories.slice(0, 8);
 
   return (
     <section className="py-16 bg-muted/30">
@@ -65,7 +78,7 @@ export function CategoriesSection() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {categories.slice(0, 8).map((category) => (
+          {displayCategories.map((category) => (
             <Link
               key={category.id}
               href={`/ideas?category=${category.id}`}
@@ -79,7 +92,7 @@ export function CategoriesSection() {
                   {category.name}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {category._count?.blogs || 0} ideas
+                  {category._count?.ideas || 0} ideas
                 </p>
               </div>
             </Link>

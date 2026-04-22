@@ -36,7 +36,8 @@ const memberNavItems = [
 ];
 
 const adminNavItems = [
-  { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { title: "Admin", href: "/admin", icon: LayoutDashboard },
+  { title: "Category", href: "/admin/categories", icon: LayoutDashboard },
   { title: "Users", href: "/admin/users", icon: Users },
   { title: "Ideas", href: "/admin/ideas", icon: Lightbulb },
   { title: "Reports", href: "/admin/reports", icon: Shield },

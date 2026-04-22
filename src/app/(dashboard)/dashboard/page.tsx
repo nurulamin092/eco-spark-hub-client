@@ -1,4 +1,4 @@
-// ============ src/app/(dashboard)/dashboard/page.tsx ============
+
 "use client";
 
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";

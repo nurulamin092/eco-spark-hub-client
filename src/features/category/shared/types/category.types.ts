@@ -1,3 +1,4 @@
+// ============ src/features/category/shared/types/category.types.ts ============
 export interface Category {
   id: string;
   name: string;
@@ -18,16 +19,16 @@ export interface Category {
 
 export interface CreateCategoryPayload {
   name: string;
-  description?: string;
-  icon?: string;
-  color?: string;
+  description?: string; // ✅ undefined allowed, not null
+  icon?: string; // ✅ undefined allowed, not null
+  color?: string; // ✅ undefined allowed, not null
 }
 
 export interface UpdateCategoryPayload {
   name?: string;
-  description?: string;
-  icon?: string;
-  color?: string;
+  description?: string | null;
+  icon?: string | null;
+  color?: string | null;
   isActive?: boolean;
 }
 
@@ -37,10 +38,10 @@ export interface CategoriesResponse {
   data: Category[];
 }
 
-export interface CategoryResponse {
+export interface ApiResponse<T> {
   success: boolean;
   message: string;
-  data: Category;
+  data: T;
 }
 
 export interface DeleteCategoryResponse {
