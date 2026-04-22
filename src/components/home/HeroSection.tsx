@@ -1,46 +1,51 @@
+// ============ src/components/home/HeroSection.tsx ============
 "use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Search, Sparkles, ArrowRight, Leaf } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 export function HeroSection() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/ideas?search=${encodeURIComponent(searchQuery)}`);
-    }
-  };
+  const handleSearch = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        router.push(`/ideas?search=${encodeURIComponent(searchQuery.trim())}`);
+      }
+    },
+    [searchQuery, router],
+  );
 
   return (
     <section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-background py-20 md:py-32">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm mb-6">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
             <Sparkles className="h-4 w-4" />
             <span>Join 10,000+ changemakers</span>
           </div>
 
           {/* Heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+          <h1 className="mb-6 text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
             Share Ideas That{" "}
-            <span className="text-primary relative">
+            <span className="relative text-primary">
               Change the Planet
               <svg
-                className="absolute -bottom-2 left-0 w-full h-3 text-primary/30"
+                className="absolute -bottom-2 left-0 h-3 w-full text-primary/30"
                 viewBox="0 0 200 10"
+                aria-hidden="true"
               >
                 <path
                   d="M0,5 Q50,0 100,5 Q150,10 200,5"
@@ -53,7 +58,7 @@ export function HeroSection() {
           </h1>
 
           {/* Description */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground md:text-xl">
             Join a community of innovators working together to create a
             sustainable future. Share your eco-friendly ideas, get feedback, and
             make a real impact.
@@ -62,16 +67,17 @@ export function HeroSection() {
           {/* Search Bar */}
           <form
             onSubmit={handleSearch}
-            className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto mb-8"
+            className="mx-auto mb-8 flex max-w-2xl flex-col gap-3 sm:flex-row"
           >
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search sustainability ideas..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                className="w-full rounded-xl border bg-background py-3 pl-12 pr-4 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                aria-label="Search ideas"
               />
             </div>
             <Button type="submit" size="lg" className="sm:w-auto w-full">
@@ -81,7 +87,7 @@ export function HeroSection() {
           </form>
 
           {/* CTA Buttons */}
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap justify-center gap-4">
             <Link href="/register">
               <Button size="lg" variant="default">
                 Get Started
@@ -96,8 +102,8 @@ export function HeroSection() {
           </div>
 
           {/* Trusted by */}
-          <div className="mt-12 pt-8 border-t">
-            <p className="text-sm text-muted-foreground mb-4">
+          <div className="mt-12 border-t pt-8">
+            <p className="mb-4 text-sm text-muted-foreground">
               Trusted by innovators from
             </p>
             <div className="flex flex-wrap justify-center gap-8 opacity-60">
