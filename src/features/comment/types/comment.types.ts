@@ -1,6 +1,8 @@
+// ============ src/features/comment/types/comment.types.ts ============
 export interface CommentAuthor {
   id: string;
   name: string;
+  email?: string;
   image: string | null;
 }
 
@@ -32,19 +34,16 @@ export interface UpdateCommentPayload {
   content: string;
 }
 
-export interface CommentsResponse {
-  success: boolean;
+export interface ApiSuccessResponse<T> {
+  success: true;
   message: string;
-  data: Comment[];
+  data: T;
 }
 
-export interface CommentResponse {
-  success: boolean;
+export interface ApiErrorResponse {
+  success: false;
   message: string;
-  data: Comment;
+  error?: unknown;
 }
 
-export interface DeleteCommentResponse {
-  success: boolean;
-  message: string;
-}
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;

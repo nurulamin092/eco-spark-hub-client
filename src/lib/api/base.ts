@@ -11,6 +11,54 @@ interface FailedRequest {
   reject: (reason?: unknown) => void;
 }
 
+// Cookie helper functions - Production grade
+const setCookie = (name: string, value: string, maxAgeDays: number = 7) => {
+  if (typeof document === "undefined") return;
+
+  const isProduction = process.env.NODE_ENV === "production";
+  const expires = new Date();
+  expires.setTime(expires.getTime() + maxAgeDays * 24 * 60 * 60 * 1000);
+
+  const cookieParts = [
+    `${name}=${value}`,
+    `expires=${expires.toUTCString()}`,
+    `path=/`,
+    `SameSite=Lax`,
+    `max-age=${maxAgeDays * 24 * 60 * 60}`,
+  ];
+
+  if (isProduction) {
+    cookieParts.push(`Secure`);
+  }
+
+  document.cookie = cookieParts.join("; ");
+};
+
+const deleteCookie = (name: string) => {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
+// JWT Decode helper with proper error handling
+const decodeJWT = (
+  token: string,
+): { role: string; exp: number; [key: string]: unknown } | null => {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const payload = JSON.parse(atob(parts[1]));
+    return {
+      role: payload.role || payload.Role || payload.userRole || "MEMBER",
+      exp: payload.exp || 0,
+      ...payload,
+    };
+  } catch (error) {
+    console.error("JWT Decode failed:", error);
+    return null;
+  }
+};
+
 class ApiClient {
   private static instance: ApiClient;
   private client: AxiosInstance;
@@ -25,7 +73,7 @@ class ApiClient {
         Accept: "application/json",
       },
       withCredentials: true,
-      timeout: 15000,
+      timeout: 30000,
     });
 
     this.setupInterceptors();
@@ -42,6 +90,14 @@ class ApiClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
+        // Add token to header for better-auth compatibility
+        if (typeof document !== "undefined") {
+          const accessToken = this.getCookie("accessToken");
+          if (accessToken && config.headers) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
+          }
+        }
+
         if (process.env.NODE_ENV === "development") {
           console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
         }
@@ -60,18 +116,14 @@ class ApiClient {
           console.log(`📥 ${response.status} ${response.config.url}`);
         }
 
-        // Save tokens from login/register response
+        // Handle login/register response - CRITICAL SECTION
         if (
           response.config.url?.includes("/auth/login") ||
           response.config.url?.includes("/auth/register")
         ) {
           const data = response.data?.data;
-          if (data?.accessToken && data?.refreshToken) {
-            this.saveTokensToCookies(
-              data.accessToken,
-              data.refreshToken,
-              data.token,
-            );
+          if (data?.accessToken) {
+            this.handleAuthResponse(data);
           }
         }
 
@@ -97,7 +149,10 @@ class ApiClient {
           originalRequest._retry = true;
 
           try {
-            await this.refreshTokens();
+            const newToken = await this.refreshTokens();
+            if (newToken && originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            }
             return this.client(originalRequest);
           } catch (refreshError) {
             this.clearAuthAndRedirect();
@@ -115,45 +170,59 @@ class ApiClient {
     );
   }
 
-  private saveTokensToCookies(
-    accessToken: string,
-    refreshToken: string,
-    sessionToken?: string,
-  ): void {
-    if (typeof document === "undefined") return;
+  private getCookie(name: string): string | null {
+    if (typeof document === "undefined") return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+    return null;
+  }
 
-    const isProduction = process.env.NODE_ENV === "production";
-    const cookieOptions = `path=/; max-age=900; ${
-      isProduction ? "Secure; " : ""
-    }SameSite=Lax`;
-    const longCookieOptions = `path=/; max-age=604800; ${
-      isProduction ? "Secure; " : ""
-    }SameSite=Lax`;
+  private handleAuthResponse(data: {
+    accessToken: string;
+    refreshToken?: string;
+    token?: string;
+    user?: { role: string };
+  }): void {
+    console.log("🔄 [base.ts] Handling auth response...");
 
-    document.cookie = `accessToken=${accessToken}; ${cookieOptions}`;
-    document.cookie = `refreshToken=${refreshToken}; ${longCookieOptions}`;
-
-    if (sessionToken) {
-      document.cookie = `better-auth.session_token=${sessionToken}; path=/; max-age=86400; ${
-        isProduction ? "Secure; " : ""
-      }SameSite=Lax`;
+    const accessToken = data.accessToken || data.token;
+    if (!accessToken) {
+      console.error("No access token in response");
+      return;
     }
 
-    // Extract and save user role - CRITICAL
-    try {
-      const payload = JSON.parse(atob(accessToken.split(".")[1]));
-      if (payload.role) {
-        document.cookie = `userRole=${payload.role}; ${cookieOptions}`;
-        console.log(`✅ [base.ts] userRole cookie set to: ${payload.role}`);
-      } else {
-        console.warn("[base.ts] No role found in token payload");
-      }
-    } catch (error) {
-      console.error("[base.ts] Failed to extract user role:", error);
+    // Decode token to get role
+    const decoded = decodeJWT(accessToken);
+    const userRole = decoded?.role || data.user?.role || "MEMBER";
+
+    console.log(`✅ [base.ts] User role extracted: ${userRole}`);
+
+    // Set all cookies with proper expiration
+    setCookie("accessToken", accessToken, 1); // 1 day for access token
+    setCookie("userRole", userRole, 7); // 7 days for role
+
+    if (data.refreshToken) {
+      setCookie("refreshToken", data.refreshToken, 30); // 30 days for refresh token
     }
 
-    console.log("[base.ts] All tokens saved to cookies");
-    console.log("[base.ts] Current cookies:", document.cookie);
+    // Store role in sessionStorage as backup
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem("userRole", userRole);
+      sessionStorage.setItem("accessToken", accessToken);
+    }
+
+    console.log("✅ [base.ts] All cookies set successfully");
+    console.log("📝 [base.ts] Current cookies:", document.cookie);
+
+    // Dispatch custom event for auth state change
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("auth-state-change", {
+          detail: { isAuthenticated: true, role: userRole },
+        }),
+      );
+    }
   }
 
   private async refreshTokens(): Promise<string | null> {
@@ -166,26 +235,37 @@ class ApiClient {
     this.isRefreshing = true;
 
     try {
+      const refreshToken = this.getCookie("refreshToken");
+      if (!refreshToken) {
+        throw new Error("No refresh token available");
+      }
+
       const response = await this.client.post(
         "/auth/refresh-token",
-        {},
+        { refreshToken },
         { timeout: 10000 },
       );
 
-      const newAccessToken = response.data?.data?.accessToken ?? null;
+      const newAccessToken =
+        response.data?.data?.accessToken || response.data?.accessToken || null;
 
       if (newAccessToken) {
-        const isProduction = process.env.NODE_ENV === "production";
-        document.cookie = `accessToken=${newAccessToken}; path=/; max-age=900; ${
-          isProduction ? "Secure; " : ""
-        }SameSite=Lax`;
+        setCookie("accessToken", newAccessToken, 1);
+
+        // Update role from new token
+        const decoded = decodeJWT(newAccessToken);
+        if (decoded?.role) {
+          setCookie("userRole", decoded.role, 7);
+          if (typeof sessionStorage !== "undefined") {
+            sessionStorage.setItem("userRole", decoded.role);
+          }
+        }
 
         this.processQueue(null, newAccessToken);
-      } else {
-        throw new Error("No access token received");
+        return newAccessToken;
       }
 
-      return newAccessToken;
+      throw new Error("No access token received");
     } catch (error) {
       this.processQueue(error, null);
       throw error;
@@ -207,15 +287,23 @@ class ApiClient {
 
   private clearAuthAndRedirect(): void {
     if (typeof window !== "undefined") {
-      const cookies = [
-        "accessToken",
-        "refreshToken",
-        "better-auth.session_token",
-        "userRole",
-      ];
-      cookies.forEach((name) => {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      });
+      deleteCookie("accessToken");
+      deleteCookie("refreshToken");
+      deleteCookie("userRole");
+      deleteCookie("better-auth.session_token");
+
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.removeItem("userRole");
+        sessionStorage.removeItem("accessToken");
+      }
+
+      // Dispatch auth change event
+      window.dispatchEvent(
+        new CustomEvent("auth-state-change", {
+          detail: { isAuthenticated: false, role: null },
+        }),
+      );
+
       window.location.href = "/login";
     }
   }

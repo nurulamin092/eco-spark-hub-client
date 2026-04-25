@@ -1,5 +1,6 @@
+// ============ src/features/idea/shared/services/idea.service.ts ============
 import { apiClient } from "@/lib/api/base";
-import {
+import type {
   CreateIdeaPayload,
   CreateIdeaResponse,
   UpdateIdeaPayload,
@@ -16,10 +17,110 @@ import {
   RelatedIdea,
 } from "../types/idea.types";
 
+// ✅ Helper to transform frontend filters to backend params
+export function transformFiltersToParams(
+  filters?: IdeaFilters,
+): Record<string, unknown> {
+  const params: Record<string, unknown> = {};
+
+  if (!filters) return params;
+
+  // Pagination
+  if (filters.page) params.page = filters.page;
+  if (filters.limit) params.limit = filters.limit;
+
+  // Search
+  if (filters.search) params.search = filters.search;
+
+  // ✅ Fix: Map 'category' to 'categoryId'
+  if (filters.category) params.categoryId = filters.category;
+
+  // Status
+  if (filters.status) params.status = filters.status;
+
+  // ✅ Fix: Transform sort values
+  if (filters.sort) {
+    switch (filters.sort) {
+      case "recent":
+        params.sortBy = "createdAt";
+        params.sortOrder = "desc";
+        break;
+      case "oldest":
+        params.sortBy = "createdAt";
+        params.sortOrder = "asc";
+        break;
+      case "popular":
+      case "top":
+        params.sortBy = "upvoteCount";
+        params.sortOrder = "desc";
+        break;
+      case "commented":
+        params.sortBy = "commentCount";
+        params.sortOrder = "desc";
+        break;
+      case "trending":
+        params.sort = "trending";
+        break;
+      default:
+        params.sortBy = "createdAt";
+        params.sortOrder = "desc";
+    }
+  }
+
+  return params;
+}
+
+// ✅ New helper for category filters (simpler type)
+interface CategoryFilters {
+  page?: number;
+  limit?: number;
+  sort?: string;
+}
+
+function transformCategoryFiltersToParams(
+  filters?: CategoryFilters,
+): Record<string, unknown> {
+  const params: Record<string, unknown> = {};
+
+  if (!filters) return params;
+
+  if (filters.page) params.page = filters.page;
+  if (filters.limit) params.limit = filters.limit;
+
+  if (filters.sort) {
+    switch (filters.sort) {
+      case "recent":
+        params.sortBy = "createdAt";
+        params.sortOrder = "desc";
+        break;
+      case "popular":
+        params.sortBy = "upvoteCount";
+        params.sortOrder = "desc";
+        break;
+      default:
+        params.sortBy = "createdAt";
+        params.sortOrder = "desc";
+    }
+  }
+
+  return params;
+}
+
 export const ideaService = {
   // Get all ideas (public)
   getAllIdeas: async (filters?: IdeaFilters): Promise<IdeasResponse> => {
-    const response = await apiClient.get("/ideas", { params: filters });
+    const params = transformFiltersToParams(filters);
+    console.log("📡 [ideaService] GET /ideas with params:", params);
+
+    const response = await apiClient.get("/ideas", { params });
+
+    // ✅ Handle both response structures
+    if (response.data?.data?.data) {
+      return response.data;
+    }
+    if (response.data?.data) {
+      return { ...response.data, data: response.data.data };
+    }
     return response.data;
   },
 
@@ -78,9 +179,13 @@ export const ideaService = {
 
   // Get my ideas
   getMyIdeas: async (filters?: MyIdeasFilters): Promise<MyIdeasResponse> => {
-    const response = await apiClient.get("/ideas/my-ideas", {
-      params: filters,
-    });
+    const params: Record<string, unknown> = {};
+    if (filters?.page) params.page = filters.page;
+    if (filters?.limit) params.limit = filters.limit;
+    if (filters?.status) params.status = filters.status;
+    if (filters?.search) params.search = filters.search;
+
+    const response = await apiClient.get("/ideas/my-ideas", { params });
     return response.data;
   },
 
@@ -104,13 +209,14 @@ export const ideaService = {
     return response.data;
   },
 
-  // Get ideas by category
+  // ✅ Fixed: Get ideas by category with proper typing
   getIdeasByCategory: async (
     categoryId: string,
-    filters?: { page?: number; limit?: number },
+    filters?: CategoryFilters,
   ): Promise<IdeasResponse> => {
+    const params = transformCategoryFiltersToParams(filters);
     const response = await apiClient.get(`/ideas/category/${categoryId}`, {
-      params: filters,
+      params,
     });
     return response.data;
   },
@@ -121,3 +227,6 @@ export const ideaService = {
     return response.data;
   },
 };
+
+// ✅ Export types for external use
+export type { CategoryFilters };

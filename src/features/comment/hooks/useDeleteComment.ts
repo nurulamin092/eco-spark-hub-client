@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// ============ src/features/comment/hooks/useDeleteComment.ts ============
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,12 +10,8 @@ export function useDeleteComment(ideaId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (commentId: string) => {
-      const response = await commentService.delete(commentId);
-      if (!response.success) {
-        throw new Error(response.message);
-      }
-      return response;
+    mutationFn: (commentId: string): Promise<void> => {
+      return commentService.delete(commentId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -26,12 +22,8 @@ export function useDeleteComment(ideaId: string) {
       });
       toast.success("Comment deleted");
     },
-    onError: (error: any) => {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to delete comment";
-      toast.error(errorMessage);
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete comment");
     },
   });
 }

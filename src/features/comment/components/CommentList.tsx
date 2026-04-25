@@ -1,3 +1,4 @@
+// ============ src/features/comment/components/CommentList.tsx ============
 "use client";
 
 import { CommentThread } from "./CommentThread";
@@ -6,13 +7,47 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, MessageCircle } from "lucide-react";
 import { useComments } from "../hooks/useComments";
+import { Comment, CommentsResponse } from "../types/comment.types";
+import { ReactElement } from "react";
 
 interface CommentListProps {
   ideaId: string;
 }
 
-export function CommentList({ ideaId }: CommentListProps) {
-  const { data: comments, isLoading, error } = useComments(ideaId);
+export function CommentList({ ideaId }: CommentListProps): ReactElement {
+  const { data, isLoading, error } = useComments(ideaId);
+
+  // ✅ Safe data extraction with proper typing
+  let comments: Comment[] = [];
+
+  if (data) {
+    // Case 1: data is directly an array
+    if (Array.isArray(data)) {
+      comments = data;
+    }
+    // Case 2: data has data property that is array (ApiResponse format)
+    else if (
+      typeof data === "object" &&
+      "data" in data &&
+      Array.isArray((data as CommentsResponse).data)
+    ) {
+      comments = (data as CommentsResponse).data;
+    }
+    // Case 3: data has comments property that is array
+    else if (
+      typeof data === "object" &&
+      "comments" in data &&
+      Array.isArray((data as { comments: Comment[] }).comments)
+    ) {
+      comments = (data as { comments: Comment[] }).comments;
+    }
+  }
+
+  // ✅ Ensure comments is always an array
+  const safeComments = Array.isArray(comments) ? comments : [];
+
+  const topLevelComments = safeComments.filter((c: Comment) => !c.parentId);
+  const totalComments = safeComments.length;
 
   if (isLoading) {
     return (
@@ -47,9 +82,6 @@ export function CommentList({ ideaId }: CommentListProps) {
     );
   }
 
-  const topLevelComments = comments?.filter((c) => !c.parentId) || [];
-  const totalComments = comments?.length || 0;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -70,7 +102,7 @@ export function CommentList({ ideaId }: CommentListProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          {topLevelComments.map((comment) => (
+          {topLevelComments.map((comment: Comment) => (
             <CommentThread key={comment.id} comment={comment} ideaId={ideaId} />
           ))}
         </div>

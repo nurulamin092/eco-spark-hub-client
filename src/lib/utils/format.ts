@@ -27,10 +27,66 @@ export function formatTimeAgo(date: string | Date): string {
   return formatDate(date);
 }
 
-export function formatNumber(num: number): string {
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
-  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
+/**
+ * Production-grade number formatting with comprehensive error handling
+ */
+export function formatNumber(
+  value: number | null | undefined | string,
+  options?: {
+    defaultValue?: string;
+    compact?: boolean;
+    fractionDigits?: number;
+  },
+): string {
+  const {
+    defaultValue = "0",
+    compact = true,
+    fractionDigits = 1,
+  } = options || {};
+
+  // Parse and validate
+  let num: number;
+
+  if (value === null || value === undefined) {
+    return defaultValue;
+  }
+
+  if (typeof value === "string") {
+    num = parseFloat(value);
+    if (isNaN(num)) return defaultValue;
+  } else if (typeof value === "number") {
+    num = value;
+    if (isNaN(num)) return defaultValue;
+  } else {
+    return defaultValue;
+  }
+
+  // Check for valid finite number
+  if (!isFinite(num)) return defaultValue;
+
+  // For small numbers or when not compact
+  if (!compact) {
+    return num.toString();
+  }
+
+  // Compact notation (K, M, B)
+  if (num >= 1_000_000_000)
+    return (num / 1_000_000_000).toFixed(fractionDigits) + "B";
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(fractionDigits) + "M";
+  if (num >= 1_000) return (num / 1_000).toFixed(fractionDigits) + "K";
+
   return num.toString();
+}
+
+// Type-safe number getter for API responses
+export function safeNumber(value: unknown, defaultValue = 0): number {
+  if (typeof value === "number" && !isNaN(value) && isFinite(value))
+    return value;
+  if (typeof value === "string") {
+    const parsed = parseFloat(value);
+    if (!isNaN(parsed) && isFinite(parsed)) return parsed;
+  }
+  return defaultValue;
 }
 
 export function formatCurrency(

@@ -1,3 +1,4 @@
+// ============ src/features/idea/details/components/IdeaHeader.tsx ============
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,30 +10,37 @@ interface IdeaHeaderProps {
   idea: Idea;
 }
 
-function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+// ✅ Safe date formatter
+function formatDate(date: string | undefined | null): string {
+  if (!date) return "Unknown date";
+  try {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "Unknown date";
+  }
 }
 
 export function IdeaHeader({ idea }: IdeaHeaderProps) {
   const isLocked = idea.isLocked ?? idea.isPaid;
+  const publishedDate = idea.publishedAt || idea.createdAt;
 
   return (
     <div className="space-y-4">
       {/* Category and Status Badges */}
       <div className="flex flex-wrap gap-2">
         <Badge
-          style={{ backgroundColor: idea.category.color || undefined }}
+          style={{ backgroundColor: idea.category?.color || undefined }}
           className="text-white"
         >
-          {idea.category.name}
+          {idea.category?.name || "Uncategorized"}
         </Badge>
         {idea.isPaid && (
           <Badge variant="secondary" className="flex items-center gap-1">
-            <DollarSign className="h-3 w-3" />${idea.price}
+            <DollarSign className="h-3 w-3" />${idea.price ?? 0}
           </Badge>
         )}
         {isLocked && (
@@ -46,25 +54,25 @@ export function IdeaHeader({ idea }: IdeaHeaderProps) {
 
       {/* Title */}
       <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-        {idea.title}
+        {idea.title || "Untitled Idea"}
       </h1>
 
       {/* Author Info */}
       <div className="flex items-center gap-3 pt-2">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={idea.author.image || ""} />
-          <AvatarFallback>{idea.author.name?.charAt(0)}</AvatarFallback>
+          <AvatarImage src={idea.author?.image || ""} />
+          <AvatarFallback>{idea.author?.name?.charAt(0) || "U"}</AvatarFallback>
         </Avatar>
         <div>
           <div className="flex items-center gap-2">
             <User className="h-3 w-3 text-muted-foreground" />
-            <span className="text-sm font-medium">{idea.author.name}</span>
+            <span className="text-sm font-medium">
+              {idea.author?.name || "Unknown Author"}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
-            <span>
-              Published {formatDate(idea.publishedAt || idea.createdAt)}
-            </span>
+            <span>Published {formatDate(publishedDate)}</span>
           </div>
         </div>
       </div>

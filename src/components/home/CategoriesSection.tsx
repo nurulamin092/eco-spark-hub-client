@@ -29,7 +29,7 @@ export function CategoriesSection() {
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories", "list"],
     queryFn: () => categoryService.getAll(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {

@@ -1,3 +1,4 @@
+// ============ src/features/idea/list/hooks/useIdeas.ts ============
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/react-query/queryKeys";
 import { ideaService } from "../../shared/services/idea.service";
@@ -13,13 +14,14 @@ export function useIdeas(
 ): {
   data: IdeasResponse["data"] | undefined;
   isLoading: boolean;
+  isFetching: boolean;
   isError: boolean;
   error: Error | null;
   refetch: () => void;
 } {
   const { enabled = true } = options;
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: queryKeys.ideas.list(filters),
     queryFn: async () => {
       const response = await ideaService.getAllIdeas(filters);
@@ -32,6 +34,7 @@ export function useIdeas(
   return {
     data,
     isLoading,
+    isFetching,
     isError,
     error: error as Error | null,
     refetch,

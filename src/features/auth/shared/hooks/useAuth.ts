@@ -31,6 +31,8 @@ interface UseAuthReturn {
   refetchUser: (options?: RefetchOptions) => Promise<unknown>;
 }
 
+// Cookie helper functions
+
 export function useAuth(): UseAuthReturn {
   const queryClient = useQueryClient();
   const refetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,7 +58,6 @@ export function useAuth(): UseAuthReturn {
   } = useQuery({
     queryKey: authKeys.user(),
     queryFn: async () => {
-      // Skip if server is known to be unhealthy
       if (serverUnhealthy) {
         console.warn("Auth skipped: Server marked as unhealthy");
         return null;
@@ -64,26 +65,21 @@ export function useAuth(): UseAuthReturn {
 
       try {
         const result = await authApi.getMe();
-        // Reset unhealthy flag on successful response
         if (isMountedRef.current && serverUnhealthy) {
           setServerUnhealthy(false);
         }
         return result;
       } catch (err: any) {
         const status = err.status || err.response?.status;
-        const message = err.message || err.response?.data?.message;
 
-        // Log only in development for debugging
         if (process.env.NODE_ENV === "development" && status !== 429) {
-          console.warn(`getMe failed (${status}):`, message);
+          console.warn(`getMe failed (${status})`);
         }
 
-        // Mark server as unhealthy on 500/503
         if (isMountedRef.current && (status === 500 || status === 503)) {
           setServerUnhealthy(true);
         }
 
-        // Don't throw for these status codes - just return null
         if (
           status === 429 ||
           status === 500 ||
@@ -93,16 +89,13 @@ export function useAuth(): UseAuthReturn {
           return null;
         }
 
-        // For other errors, rethrow
         throw err;
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     retry: (failureCount, error: any) => {
       const status = error?.status || error?.response?.status;
-
-      // NEVER retry on these status codes
       if (
         status === 429 ||
         status === 500 ||
@@ -111,27 +104,22 @@ export function useAuth(): UseAuthReturn {
       ) {
         return false;
       }
-
-      // Max 1 retry for other errors
       return failureCount < 1;
     },
-    retryDelay: 5000, // Wait 5 seconds before retry
+    retryDelay: 5000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchInterval: false,
-    // Use cached data if available
     initialData: () => {
       const cached = queryClient.getQueryData<User>(authKeys.user());
       return cached;
     },
-    // Don't refetch on mount if we have valid cached data
     initialDataUpdatedAt: () => {
       const state = queryClient.getQueryState(authKeys.user());
       return state?.dataUpdatedAt;
     },
   });
 
-  // Debounced refetch to prevent rapid successive calls (DECLARED FIRST)
   const debouncedRefetch = useCallback(
     (options?: RefetchOptions) => {
       if (refetchTimeoutRef.current) {
@@ -148,39 +136,43 @@ export function useAuth(): UseAuthReturn {
     [refetchUser],
   );
 
-  // Reset unhealthy status after 30 seconds (USES debouncedRefetch AFTER declaration)
   useEffect(() => {
     if (serverUnhealthy) {
       const timer = setTimeout(() => {
         if (isMountedRef.current) {
           setServerUnhealthy(false);
-          // Trigger a refetch after server might be healthy
           debouncedRefetch();
         }
       }, 30000);
       return () => clearTimeout(timer);
     }
-  }, [serverUnhealthy, debouncedRefetch]); // ✅ Added debouncedRefetch to dependencies
+  }, [serverUnhealthy, debouncedRefetch]);
 
+  // ✅ LOGIN MUTATION - Fixed
   const loginMutation = useMutation({
     mutationFn: (payload: { email: string; password: string }) =>
       authApi.login(payload),
     onSuccess: (response) => {
-      // Reset unhealthy flag on successful login
       if (isMountedRef.current && serverUnhealthy) {
         setServerUnhealthy(false);
       }
-      // Update cache with user data
       queryClient.setQueryData(authKeys.user(), response.data.user);
       toast.success(response.message || "Login successful");
-      // Use window.location for hard navigation to ensure cookie sync
-      window.location.href = "/dashboard";
+
+      // Small delay to ensure cookies are set before navigation
+      setTimeout(() => {
+        const role = response.data.user?.role;
+        if (role === "ADMIN" || role === "SUPER_ADMIN") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/dashboard";
+        }
+      }, 100);
     },
     onError: (error: any) => {
       const status = error.response?.status;
       let message = error.response?.data?.message || "Login failed";
 
-      // Custom message for rate limit
       if (status === 429) {
         message = "Too many login attempts. Please try again later.";
       } else if (status === 500) {
@@ -191,17 +183,25 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
+  // ✅ REGISTER MUTATION - Fixed
   const registerMutation = useMutation({
     mutationFn: (payload: { name: string; email: string; password: string }) =>
       authApi.register(payload),
     onSuccess: (response) => {
-      // Reset unhealthy flag on successful registration
       if (isMountedRef.current && serverUnhealthy) {
         setServerUnhealthy(false);
       }
       queryClient.setQueryData(authKeys.user(), response.data.user);
       toast.success(response.message || "Registration successful");
-      window.location.href = "/dashboard";
+
+      setTimeout(() => {
+        const role = response.data.user?.role;
+        if (role === "ADMIN" || role === "SUPER_ADMIN") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/dashboard";
+        }
+      }, 100);
     },
     onError: (error: any) => {
       const status = error.response?.status;
@@ -217,23 +217,86 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
+  // ✅ SUPER ROBUST LOGOUT MUTATION
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await authApi.logout();
+      console.log("📤 [useAuth] Starting logout process...");
+
+      // IMMEDIATE: Clear React Query cache first
+      queryClient.clear();
+
+      // IMMEDIATE: Force clear all cookies from client side
+      if (typeof document !== "undefined") {
+        const cookiesToDelete = [
+          "accessToken",
+          "refreshToken",
+          "userRole",
+          "role",
+          "better-auth.session_token",
+          "token",
+        ];
+
+        // Multiple path variations to ensure complete cleanup
+        const paths = ["/", "/admin", "/dashboard", "/member", "/api"];
+
+        cookiesToDelete.forEach((name) => {
+          paths.forEach((path) => {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=localhost`;
+          });
+        });
+
+        console.log("🗑️ All cookies force cleared from client");
+      }
+
+      // Clear all storage
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.clear();
+      }
+      if (typeof localStorage !== "undefined") {
+        localStorage.clear();
+      }
+
+      // Call API logout (fire and forget - don't wait)
+      authApi.logout().catch((err) => {
+        console.warn("API logout error (ignored):", err);
+      });
     },
     onSuccess: () => {
-      // Clear all query cache
-      queryClient.clear();
+      console.log("✅ [useAuth] Logout successful");
       toast.success("Logged out successfully");
-      window.location.href = "/";
+
+      // Double-check cookies are cleared before navigation
+      const checkCookies = () => {
+        const hasAuthCookies =
+          document.cookie.includes("userRole") ||
+          document.cookie.includes("accessToken");
+        if (hasAuthCookies) {
+          console.warn("Some cookies still present, clearing again...");
+          const cookiesToDelete = [
+            "accessToken",
+            "refreshToken",
+            "userRole",
+            "role",
+          ];
+          cookiesToDelete.forEach((name) => {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+          });
+        }
+      };
+
+      checkCookies();
+
+      // Use replace to prevent back button issues
+      window.location.replace("/");
     },
-    onError: () => {
-      // Still clear local state even if API fails
-      queryClient.clear();
-      window.location.href = "/";
+    onError: (error: any) => {
+      console.error("❌ [useAuth] Logout error:", error);
+      // Still navigate even on error - cookies are already cleared
+      window.location.replace("/");
     },
   });
-
+  // ✅ CHANGE PASSWORD MUTATION
   const changePasswordMutation = useMutation({
     mutationFn: (payload: { currentPassword: string; newPassword: string }) =>
       authApi.changePassword(payload),
@@ -253,6 +316,7 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
+  // ✅ CALLBACKS - All properly memoized
   const login = useCallback(
     (email: string, password: string) => {
       loginMutation.mutate({ email, password });

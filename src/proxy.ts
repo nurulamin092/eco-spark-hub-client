@@ -1,6 +1,7 @@
 // ============ src/proxy.ts ============
 import { NextRequest, NextResponse } from "next/server";
 
+// Route definitions
 const PUBLIC_ROUTES = ["/", "/about", "/testimonials"];
 const PUBLIC_PREFIXES = [
   "/ideas",
@@ -35,80 +36,91 @@ const STATIC_ASSETS = [
   "/.well-known",
 ];
 
-function isStaticAsset(pathname: string): boolean {
-  return STATIC_ASSETS.some((asset) => pathname.startsWith(asset));
-}
+// Helper functions
+const isStaticAsset = (pathname: string): boolean =>
+  STATIC_ASSETS.some((asset) => pathname.startsWith(asset));
 
-function isPublicRoute(pathname: string): boolean {
+const isPublicRoute = (pathname: string): boolean => {
   if (PUBLIC_ROUTES.includes(pathname)) return true;
   return PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
-}
+};
 
-function isAuthRoute(pathname: string): boolean {
-  return AUTH_ROUTES.some((route) => pathname === route);
-}
+const isAuthRoute = (pathname: string): boolean =>
+  AUTH_ROUTES.some((route) => pathname === route);
 
-function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(
+const isProtectedRoute = (pathname: string): boolean =>
+  PROTECTED_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
+
+const isAdminRoute = (pathname: string): boolean =>
+  pathname === "/admin" || pathname.startsWith("/admin/");
+
+// JWT decode with multiple field support
+function decodeJWT(token: string): { role: string; exp: number } | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
+    return {
+      role: payload.role || payload.Role || payload.userRole || "MEMBER",
+      exp: payload.exp || 0,
+    };
+  } catch {
+    return null;
+  }
 }
 
-function isAdminRoute(pathname: string): boolean {
-  return pathname === "/admin" || pathname.startsWith("/admin/");
-}
-
+// Get auth info from multiple sources
 function getUserInfoFromToken(request: NextRequest): {
   isAuthenticated: boolean;
   role: string | null;
 } {
+  // Check cookies first
   const userRoleCookie = request.cookies.get("userRole")?.value;
   const accessToken = request.cookies.get("accessToken")?.value;
 
   console.log(`[Proxy] userRole cookie: ${userRoleCookie}`);
   console.log(`[Proxy] accessToken exists: ${!!accessToken}`);
 
-  if (userRoleCookie === "ADMIN" || userRoleCookie === "SUPER_ADMIN") {
+  // Valid roles from cookie
+  const validRoles = ["SUPER_ADMIN", "ADMIN", "MODERATOR", "MEMBER"];
+
+  if (userRoleCookie && validRoles.includes(userRoleCookie)) {
     console.log(`[Proxy] Using userRole cookie: ${userRoleCookie}`);
     return { isAuthenticated: true, role: userRoleCookie };
   }
 
-  if (userRoleCookie === "MEMBER") {
-    return { isAuthenticated: true, role: "MEMBER" };
-  }
+  // Try to get from sessionStorage (client-side only - handled separately)
 
-  if (!accessToken) {
-    return { isAuthenticated: false, role: null };
-  }
-
-  try {
-    const parts = accessToken.split(".");
-    if (parts.length >= 2) {
-      const payloadBase64 = parts[1];
-      const decodedPayload = Buffer.from(payloadBase64, "base64").toString();
-      const payload = JSON.parse(decodedPayload);
-
-      if (payload.exp && Date.now() >= payload.exp * 1000) {
-        return { isAuthenticated: false, role: null };
-      }
-
-      return {
-        isAuthenticated: true,
-        role: payload.role || "MEMBER",
-      };
+  // Fallback to JWT decode
+  if (accessToken) {
+    const decoded = decodeJWT(accessToken);
+    if (decoded && decoded.exp && Date.now() < decoded.exp * 1000) {
+      console.log(`[Proxy] Role from token decode: ${decoded.role}`);
+      return { isAuthenticated: true, role: decoded.role };
     }
-  } catch {
-    // Silent fail
+
+    if (decoded && !decoded.exp) {
+      console.log(`[Proxy] Role from token (no exp): ${decoded.role}`);
+      return { isAuthenticated: true, role: decoded.role };
+    }
+
+    if (decoded && decoded.exp && Date.now() >= decoded.exp * 1000) {
+      console.log("[Proxy] Token expired");
+    }
   }
 
-  return { isAuthenticated: true, role: "MEMBER" };
+  return { isAuthenticated: false, role: null };
 }
 
 export function proxy(request: NextRequest): NextResponse {
   const { pathname, searchParams } = request.nextUrl;
 
+  // Skip static assets
   if (isStaticAsset(pathname)) {
     return NextResponse.next();
   }
@@ -117,7 +129,7 @@ export function proxy(request: NextRequest): NextResponse {
 
   console.log(`[Proxy] ${pathname} | Auth: ${isAuthenticated} | Role: ${role}`);
 
-  // Auth Routes
+  // Auth routes (login/register)
   if (isAuthRoute(pathname)) {
     if (isAuthenticated) {
       const redirectTo = searchParams.get("redirect");
@@ -135,12 +147,12 @@ export function proxy(request: NextRequest): NextResponse {
     return NextResponse.next();
   }
 
-  // Public Routes
+  // Public routes
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // Protected Routes (No Auth)
+  // Protected routes without authentication
   if (
     !isAuthenticated &&
     (isProtectedRoute(pathname) || isAdminRoute(pathname))
@@ -150,18 +162,20 @@ export function proxy(request: NextRequest): NextResponse {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Admin Routes Access Control
+  // Admin routes access control
   if (isAuthenticated && isAdminRoute(pathname)) {
-    const isAdminUser = role === "ADMIN" || role === "SUPER_ADMIN";
-    if (!isAdminUser) {
+    const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
+    if (!isAdmin) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
+  // Security headers
   const response = NextResponse.next();
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Cache-Control", "no-store, must-revalidate");
 
   return response;
 }

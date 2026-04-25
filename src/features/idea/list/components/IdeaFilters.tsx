@@ -1,9 +1,8 @@
+// ============ src/features/idea/list/components/IdeaFilters.tsx ============
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-
-import { queryKeys } from "@/lib/react-query/queryKeys";
 import {
   Select,
   SelectContent,
@@ -11,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { categoryService } from "../../shared/services/category.service";
+import { categoryService } from "@/features/category/shared/services/category.service";
 
 interface IdeaFiltersProps {
   value: string;
@@ -19,15 +18,11 @@ interface IdeaFiltersProps {
 }
 
 export function IdeaFilters({ value, onChange }: IdeaFiltersProps) {
-  const { data: categoriesData, isLoading } = useQuery({
-    queryKey: queryKeys.categories.all,
-    queryFn: async () => {
-      const response = await categoryService.getAll();
-      return response.data;
-    },
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ["categories", "list"],
+    queryFn: () => categoryService.getAll(),
+    staleTime: 5 * 60 * 1000,
   });
-
-  const categories = categoriesData ?? [];
 
   const selectedValue = value || "all";
 
@@ -35,27 +30,27 @@ export function IdeaFilters({ value, onChange }: IdeaFiltersProps) {
     onChange(val === "all" ? "" : val);
   };
 
-  return (
-    <Select
-      value={selectedValue}
-      onValueChange={handleChange}
-      disabled={isLoading} // ✅ disable while loading
-    >
-      <SelectTrigger className="w-45">
-        {isLoading ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+  if (isLoading) {
+    return (
+      <Select disabled>
+        <SelectTrigger className="w-40">
+          <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Loading...
+            <span>Loading...</span>
           </div>
-        ) : (
-          <SelectValue placeholder="All Categories" />
-        )}
-      </SelectTrigger>
+        </SelectTrigger>
+      </Select>
+    );
+  }
 
+  return (
+    <Select value={selectedValue} onValueChange={handleChange}>
+      <SelectTrigger className="w-40">
+        <SelectValue placeholder="All Categories" />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All Categories</SelectItem>
-
-        {categories.map((category) => (
+        {categories?.map((category) => (
           <SelectItem key={category.id} value={category.id}>
             {category.name}
           </SelectItem>

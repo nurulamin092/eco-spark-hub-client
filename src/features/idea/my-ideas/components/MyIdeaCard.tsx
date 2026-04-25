@@ -24,6 +24,7 @@ import {
 import { Idea } from "../../shared/types/idea.types";
 import { DeleteIdeaDialog } from "./DeleteIdeaDialog";
 import { useSubmitIdea } from "../hooks/useSubmitIdea";
+import { formatNumber } from "@/lib/utils/format";
 
 interface MyIdeaCardProps {
   idea: Idea;
@@ -37,11 +38,21 @@ const statusConfig = {
   REJECTED: { label: "Rejected", variant: "destructive" as const },
 };
 
-function formatNumber(num: number): string {
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
-  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
-  return num.toString();
-}
+// function formatNumber(num: number | null | undefined): string {
+//   if (num === null || num === undefined || typeof num !== "number") {
+//     console.warn("Invalid number provided to formatNumber:", num);
+//     return "0";
+//   }
+
+//   if (isNaN(num)) {
+//     console.warn("NaN provided to formatNumber");
+//     return "0";
+//   }
+
+//   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+//   if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
+//   return num.toString();
+// }
 
 export function MyIdeaCard({ idea, onRefresh }: MyIdeaCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

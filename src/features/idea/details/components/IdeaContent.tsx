@@ -1,5 +1,6 @@
+// ============ src/features/idea/details/components/IdeaContent.tsx ============
 "use client";
-
+import { ReactElement } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Idea } from "../../shared/types/idea.types";
 
@@ -8,6 +9,17 @@ interface IdeaContentProps {
   isLocked?: boolean;
 }
 
+// ✅ Safe text formatter
+function formatText(text: string | undefined | null): string {
+  if (!text) return "No content available.";
+  return text;
+}
+
+function renderParagraphs(text: string): ReactElement[] {
+  return text
+    .split("\n")
+    .map((paragraph, idx) => <p key={idx}>{paragraph || "\u00A0"}</p>);
+}
 export function IdeaContent({ idea, isLocked }: IdeaContentProps) {
   if (isLocked) {
     return (
@@ -21,6 +33,10 @@ export function IdeaContent({ idea, isLocked }: IdeaContentProps) {
     );
   }
 
+  const description = formatText(idea.description);
+  const problem = formatText(idea.problem);
+  const solution = formatText(idea.solution);
+
   return (
     <Tabs defaultValue="description" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -31,27 +47,21 @@ export function IdeaContent({ idea, isLocked }: IdeaContentProps) {
 
       <TabsContent value="description" className="mt-4 space-y-4">
         <div className="prose prose-slate dark:prose-invert max-w-none">
-          {idea.description.split("\n").map((paragraph, idx) => (
-            <p key={idx}>{paragraph}</p>
-          ))}
+          {renderParagraphs(description)}
         </div>
       </TabsContent>
 
       <TabsContent value="problem" className="mt-4 space-y-4">
         <div className="prose prose-slate dark:prose-invert max-w-none">
-          <h3>The Problem We&lsquo;re Solving</h3>
-          {idea.problem.split("\n").map((paragraph, idx) => (
-            <p key={idx}>{paragraph}</p>
-          ))}
+          <h3>The Problem We&apos;re Solving</h3>
+          {renderParagraphs(problem)}
         </div>
       </TabsContent>
 
       <TabsContent value="solution" className="mt-4 space-y-4">
         <div className="prose prose-slate dark:prose-invert max-w-none">
           <h3>Our Proposed Solution</h3>
-          {idea.solution.split("\n").map((paragraph, idx) => (
-            <p key={idx}>{paragraph}</p>
-          ))}
+          {renderParagraphs(solution)}
         </div>
       </TabsContent>
     </Tabs>

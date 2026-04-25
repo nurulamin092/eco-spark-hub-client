@@ -1,3 +1,4 @@
+// ============ src/features/auth/shared/services/auth.service.ts ============
 import { apiClient } from "@/lib/api/base";
 import {
   AuthResponse,
@@ -20,12 +21,32 @@ import {
   SessionsResponse,
 } from "../../sessions/types/session.types";
 
+// Cookie helper functions
+const deleteCookie = (name: string) => {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
+const deleteAllAuthCookies = () => {
+  const cookies = [
+    "accessToken",
+    "refreshToken",
+    "userRole",
+    "role",
+    "better-auth.session_token",
+    "token",
+  ];
+
+  cookies.forEach(deleteCookie);
+  console.log("🗑️ All auth cookies cleared");
+};
+
 export const authService = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
     const response = await apiClient.post("/auth/login", { email, password });
     return response.data;
   },
-  // Register
+
   register: async (
     name: string,
     email: string,
@@ -38,6 +59,58 @@ export const authService = {
     });
     return response.data;
   },
+
+  // ✅ FIXED LOGOUT - Proper cookie clearing
+  logout: async (): Promise<void> => {
+    try {
+      console.log("📤 [auth.service] Attempting logout...");
+
+      // Clear cookies FIRST (before API call to ensure it happens)
+      deleteAllAuthCookies();
+
+      // Clear sessionStorage
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.removeItem("userRole");
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("better-auth.session_token");
+      }
+
+      // Clear localStorage if any auth data exists
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("auth-storage");
+        localStorage.removeItem("user");
+      }
+
+      // Try to call logout API (don't wait for it, but attempt)
+      try {
+        await apiClient.post("/auth/logout", {}, { timeout: 3000 });
+        console.log("✅ [auth.service] Logout API call successful");
+      } catch (apiError) {
+        // Don't fail if API is unreachable - we already cleared local data
+        console.warn(
+          "⚠️ [auth.service] Logout API failed, but local data cleared:",
+          apiError,
+        );
+      }
+
+      // Dispatch custom event for auth state change
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("auth-state-change", {
+            detail: { isAuthenticated: false, role: null },
+          }),
+        );
+      }
+
+      console.log("✅ [auth.service] Logout completed successfully");
+    } catch (error) {
+      console.error("❌ [auth.service] Logout error:", error);
+      // Still clear cookies even if error occurs
+      deleteAllAuthCookies();
+      throw error;
+    }
+  },
+
   // Email Verification
   verifyEmail: async (
     data: VerifyEmailRequest,
@@ -57,6 +130,7 @@ export const authService = {
     const response = await apiClient.post("/auth/verify-otp", { email, otp });
     return response.data;
   },
+
   // Resend OTP
   resendOtp: async (data: ResendOtpRequest): Promise<ResendOtpResponse> => {
     const response = await apiClient.post("/auth/resend-otp", data);
@@ -106,6 +180,7 @@ export const authService = {
     });
     return response.data;
   },
+
   // Get Current User
   getMe: async () => {
     const response = await apiClient.get("/auth/me");
@@ -136,13 +211,5 @@ export const authService = {
       data: { password },
     });
     return response.data;
-  },
-  // Logout
-  logout: async () => {
-    try {
-      await apiClient.post("/auth/logout");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
   },
 };

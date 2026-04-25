@@ -60,7 +60,6 @@ export interface CreateIdeaResponse {
   data: Idea;
 }
 
-// ✅ FIXED: Allow null for price to match EditIdeaPayload
 export interface UpdateIdeaPayload {
   title?: string;
   problem?: string;
@@ -92,7 +91,7 @@ export interface IdeaFilters {
   search?: string;
   category?: string;
   isPaid?: boolean;
-  sort?: "recent" | "top" | "commented" | "trending";
+  sort?: "recent" | "top" | "commented" | "trending" | "popular" | "oldest";
   status?: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
 }
 
@@ -103,6 +102,14 @@ export interface MyIdeasFilters {
   search?: string;
 }
 
+export interface IdeaFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;   
+  status?: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+  sort?: "recent" | "top" | "popular" | "commented" | "trending" | "oldest";
+}
 export interface MyIdeasResponse {
   success: boolean;
   message: string;

@@ -17,6 +17,36 @@ export type {
   RegisterPayload,
   ChangePasswordPayload,
 };
+const forceClearAllAuthCookies = () => {
+  if (typeof document === "undefined") return;
+
+  console.log("🗑️ Force clearing all auth cookies...");
+
+  // Multiple path variations to ensure complete cleanup
+  const paths = ["/", "/admin", "/dashboard", "/member"];
+  const domains = ["", "; domain=localhost", "; domain=.localhost"];
+
+  const cookiesToDelete = [
+    "accessToken",
+    "refreshToken",
+    "userRole",
+    "role",
+    "better-auth.session_token",
+    "token",
+    "__Secure-next-auth.session-token",
+    "next-auth.session-token",
+  ];
+
+  cookiesToDelete.forEach((cookieName) => {
+    paths.forEach((path) => {
+      domains.forEach((domain) => {
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};${domain}`;
+      });
+    });
+  });
+
+  console.log("✅ All auth cookies force cleared");
+};
 
 class AuthApiService {
   private static instance: AuthApiService;
@@ -43,12 +73,70 @@ class AuthApiService {
   }
 
   async logout(): Promise<void> {
-    try {
-      await apiClient.post("/auth/logout");
-      console.log("✅ [auth.api] Logout successful");
-    } catch (error) {
-      console.error("Logout error:", error);
+    console.log("📤 [auth.api] Starting logout process...");
+
+    // STEP 1: Force clear ALL cookies immediately (critical)
+    forceClearAllAuthCookies();
+
+    // STEP 2: Clear all browser storage
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.clear();
+      console.log("🗑️ Session storage cleared");
     }
+
+    if (typeof localStorage !== "undefined") {
+      const authKeys = [
+        "auth-storage",
+        "user",
+        "persist:root",
+        "token",
+        "refreshToken",
+      ];
+      authKeys.forEach((key) => localStorage.removeItem(key));
+      console.log("🗑️ Local storage auth items cleared");
+    }
+
+    // STEP 3: Try API logout (non-blocking)
+    try {
+      await Promise.race([
+        apiClient.post("/auth/logout", {}, { timeout: 2000 }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Logout API timeout")), 2000),
+        ),
+      ]);
+      console.log("✅ [auth.api] Logout API successful");
+    } catch (apiError) {
+      // Log but don't throw - cookies already cleared
+      console.warn(
+        "⚠️ [auth.api] Logout API failed, but cookies are already cleared:",
+        apiError,
+      );
+    }
+
+    // STEP 4: Double-check cookies are cleared (retry if needed)
+    setTimeout(() => {
+      const remainingCookies = document.cookie;
+      if (
+        remainingCookies.includes("userRole") ||
+        remainingCookies.includes("accessToken")
+      ) {
+        console.warn("⚠️ Some cookies still present, force clearing again...");
+        forceClearAllAuthCookies();
+      } else {
+        console.log("✅ All cookies successfully cleared");
+      }
+    }, 50);
+
+    // STEP 5: Dispatch auth change event
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("auth-state-change", {
+          detail: { isAuthenticated: false, role: null },
+        }),
+      );
+    }
+
+    console.log(" [auth.api] Logout process completed");
   }
 
   async getMe(): Promise<User> {
