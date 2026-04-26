@@ -75,7 +75,17 @@ export interface FullDashboardData {
   categoryStats: CategoryStat[];
   systemHealth: SystemHealth;
 }
-
+export interface Member {
+  id: string;
+  name: string;
+  email: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    status: string;
+  };
+}
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;

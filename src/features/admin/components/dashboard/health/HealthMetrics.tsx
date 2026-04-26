@@ -1,7 +1,8 @@
+// ============ src/features/admin/components/dashboard/health/HealthMetrics.tsx ============
 "use client";
 
 import { Users, Lightbulb, Server } from "lucide-react";
-import { SystemHealth } from "../../../types/admin.types";
+import type { SystemHealth } from "../../../types/admin.types";
 
 interface HealthMetricsProps {
   health: SystemHealth;

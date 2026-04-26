@@ -1,3 +1,4 @@
+// ============ src/features/admin/components/dashboard/stats/StatsSkeleton.tsx ============
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";

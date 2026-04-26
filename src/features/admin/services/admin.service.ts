@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// ============ src/features/admin/services/admin.service.ts ============
 import { apiClient } from "@/lib/api/base";
-import {
-  ApiResponse,
+import type {
   FullDashboardData,
+  DashboardStats,
   GrowthAnalytics,
+  TopIdea,
   PendingIdea,
   RecentReport,
   SystemHealth,
-  TopIdea,
+  Member,
+  ApiResponse,
 } from "../types/admin.types";
 
 class AdminService {
@@ -21,45 +24,24 @@ class AdminService {
     }
     return AdminService.instance;
   }
-  async getFullDashboard(): Promise<FullDashboardData> {
-    const response = await apiClient.get<ApiResponse<any>>("/admin/dashboard");
-    // Transform the response to match FullDashboardData structure
-    const data = response.data.data;
-    return {
-      stats: data.stats,
-      analytics: data.analytics || { ideas: [], revenue: [] },
-      topIdeas: data.topIdeas || [],
-      reports: data.recentReports || [],
-      pendingIdeas: data.pendingIdeas || [],
-      recentActivities: data.recentActivities || [],
-      memberGrowth: data.memberGrowth || {
-        last7Days: [],
-        totalActive: 0,
-        totalBlocked: 0,
-      },
-      categoryStats: data.categoryStats || [],
-      systemHealth: data.systemHealth || {
-        activeUsers24h: 0,
-        newIdeas24h: 0,
-        activeSessions: 0,
-        timestamp: new Date().toISOString(),
-      },
-    };
-  }
 
-  async getStats() {
-    const response = await apiClient.get("/admin/dashboard/stats");
+  // Dashboard
+  async getFullDashboard(): Promise<FullDashboardData> {
+    const response =
+      await apiClient.get<ApiResponse<FullDashboardData>>("/admin/dashboard");
     return response.data.data;
   }
-  async getGrowthAnalytics(): Promise<GrowthAnalytics> {
-    const response = await apiClient.get<ApiResponse<GrowthAnalytics>>(
-      "/admin/dashboard/growth",
+
+  async getStats(): Promise<DashboardStats> {
+    const response = await apiClient.get<ApiResponse<DashboardStats>>(
+      "/admin/dashboard/stats",
     );
     return response.data.data;
   }
-  async getPendingIdeas(limit: number = 10): Promise<PendingIdea[]> {
-    const response = await apiClient.get<ApiResponse<PendingIdea[]>>(
-      `/admin/dashboard/pending-ideas?limit=${limit}`,
+
+  async getGrowthAnalytics(): Promise<GrowthAnalytics> {
+    const response = await apiClient.get<ApiResponse<GrowthAnalytics>>(
+      "/admin/dashboard/growth",
     );
     return response.data.data;
   }
@@ -70,9 +52,10 @@ class AdminService {
     );
     return response.data.data;
   }
-  async getSystemHealth(): Promise<SystemHealth> {
-    const response = await apiClient.get<ApiResponse<SystemHealth>>(
-      "/admin/dashboard/system-health",
+
+  async getPendingIdeas(limit: number = 10): Promise<PendingIdea[]> {
+    const response = await apiClient.get<ApiResponse<PendingIdea[]>>(
+      `/admin/dashboard/pending-ideas?limit=${limit}`,
     );
     return response.data.data;
   }
@@ -82,6 +65,75 @@ class AdminService {
       `/admin/dashboard/recent-reports?limit=${limit}`,
     );
     return response.data.data;
+  }
+
+  async getSystemHealth(): Promise<SystemHealth> {
+    const response = await apiClient.get<ApiResponse<SystemHealth>>(
+      "/admin/dashboard/system-health",
+    );
+    return response.data.data;
+  }
+
+  // Members
+  async getAllMembers(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }): Promise<{ data: Member[]; meta: any }> {
+    const response = await apiClient.get("/admin/members", { params });
+    return response.data.data;
+  }
+
+  async activateMember(memberId: string): Promise<void> {
+    await apiClient.patch(`/admin/members/${memberId}/activate`);
+  }
+
+  async deactivateMember(memberId: string): Promise<void> {
+    await apiClient.patch(`/admin/members/${memberId}/deactivate`);
+  }
+
+  // Idea Moderation
+  async approveIdea(ideaId: string): Promise<void> {
+    await apiClient.patch(`/admin/ideas/${ideaId}/approve`);
+  }
+
+  async rejectIdea(ideaId: string, feedback: string): Promise<void> {
+    await apiClient.patch(`/admin/ideas/${ideaId}/reject`, { feedback });
+  }
+
+  async bulkApproveIdeas(ideaIds: string[]): Promise<{ count: number }> {
+    const response = await apiClient.post("/admin/ideas/bulk/approve", {
+      ids: ideaIds,
+    });
+    return response.data.data;
+  }
+
+  async bulkRejectIdeas(
+    ideaIds: string[],
+    feedback: string,
+  ): Promise<{ count: number }> {
+    const response = await apiClient.post("/admin/ideas/bulk/reject", {
+      ids: ideaIds,
+      feedback,
+    });
+    return response.data.data;
+  }
+
+  // Export
+  async exportUsers(format: "csv" | "json" = "csv"): Promise<Blob> {
+    const response = await apiClient.get(
+      `/admin/export/users?format=${format}`,
+      { responseType: "blob" },
+    );
+    return response.data;
+  }
+
+  async exportIdeas(format: "csv" | "json" = "csv"): Promise<Blob> {
+    const response = await apiClient.get(
+      `/admin/export/ideas?format=${format}`,
+      { responseType: "blob" },
+    );
+    return response.data;
   }
 }
 

@@ -8,6 +8,12 @@ export interface CheckoutResponse {
   message: string;
   data: CheckoutSession;
 }
+export interface PaymentIdea {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+}
 
 export interface Payment {
   id: string;
@@ -18,14 +24,13 @@ export interface Payment {
   status: "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED";
   provider: string;
   transactionId: string | null;
+  stripeSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  paymentMethod?: string | null;
+  accessExpiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
-  idea?: {
-    id: string;
-    title: string;
-    slug: string;
-    description: string;
-  };
+  idea?: PaymentIdea;
 }
 
 export interface PaymentsResponse {
@@ -40,4 +45,10 @@ export interface VerifyAccessResponse {
   data: {
     hasAccess: boolean;
   };
+}
+
+export interface PaymentStatusResponse {
+  success: boolean;
+  message: string;
+  data: Payment | null;
 }

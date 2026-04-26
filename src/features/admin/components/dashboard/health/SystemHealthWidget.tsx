@@ -1,13 +1,14 @@
+// ============ src/features/admin/components/dashboard/health/SystemHealthWidget.tsx ============
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Activity } from "lucide-react";
 import { HealthMetrics } from "./HealthMetrics";
-import { SystemHealth as SystemHealthType } from "../../../types/admin.types";
+import type { SystemHealth } from "../../../types/admin.types";
 
 interface SystemHealthWidgetProps {
-  health: SystemHealthType;
+  health: SystemHealth;
   isLoading?: boolean;
 }
 

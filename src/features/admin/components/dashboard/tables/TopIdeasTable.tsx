@@ -1,10 +1,12 @@
+// ============ src/features/admin/components/dashboard/tables/TopIdeasTable.tsx ============
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp } from "lucide-react";
 import { TopIdeasItem } from "./TopIdeasItem";
-import { TopIdea } from "@/features/admin/types/admin.types";
+import type { TopIdea } from "../../../types/admin.types";
+
 interface TopIdeasTableProps {
   ideas: TopIdea[];
   isLoading?: boolean;

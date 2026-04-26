@@ -1,37 +1,20 @@
+// ============ src/features/admin/hooks/mutations/useRejectIdea.ts ============
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { adminIdeasService } from "../../services/adminIdeas.service";
 
-export const ADMIN_QUERY_KEYS = {
-  PENDING_IDEAS: "admin-pending-ideas",
-  STATS: "admin-stats",
-} as const;
-
 export function useRejectIdea() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      ideaId,
-      feedback,
-    }: {
-      ideaId: string;
-      feedback: string;
-    }) => {
-      const response = await adminIdeasService.rejectIdea(ideaId, feedback);
-      if (!response.success) {
-        throw new Error(response.message);
-      }
-      return response;
-    },
+    mutationFn: ({ ideaId, feedback }: { ideaId: string; feedback: string }) =>
+      adminIdeasService.rejectIdea(ideaId, feedback),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [ADMIN_QUERY_KEYS.PENDING_IDEAS],
-      });
-      queryClient.invalidateQueries({ queryKey: [ADMIN_QUERY_KEYS.STATS] });
-      toast.success("Idea rejected successfully");
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "pending-ideas"] });
+      toast.success("Idea rejected");
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to reject idea");

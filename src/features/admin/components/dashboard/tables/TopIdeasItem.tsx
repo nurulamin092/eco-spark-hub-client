@@ -1,8 +1,9 @@
+// ============ src/features/admin/components/dashboard/tables/TopIdeasItem.tsx ============
 "use client";
 
 import Link from "next/link";
 import { TrendingUp, Eye } from "lucide-react";
-import { TopIdea } from "@/features/admin/types/admin.types";
+import type { TopIdea } from "../../../types/admin.types";
 
 interface TopIdeasItemProps {
   idea: TopIdea;

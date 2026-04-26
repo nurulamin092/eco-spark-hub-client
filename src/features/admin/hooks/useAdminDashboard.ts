@@ -1,3 +1,4 @@
+// src/features/admin/hooks/useAdminDashboard.ts
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -16,9 +17,9 @@ export function useAdminDashboard() {
   } = useQuery({
     queryKey: [ADMIN_QUERY_KEYS.dashboard],
     queryFn: () => adminService.getFullDashboard(),
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
-    retry: 1,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
     retryDelay: 1000,
   });
 
@@ -36,4 +37,3 @@ export function useAdminDashboard() {
     refetch,
   };
 }
-

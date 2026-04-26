@@ -3,6 +3,7 @@ import {
   CheckoutResponse,
   PaymentsResponse,
   VerifyAccessResponse,
+  PaymentStatusResponse,
 } from "../types/payment.types";
 
 export const paymentService = {
@@ -18,6 +19,10 @@ export const paymentService = {
 
   verifyAccess: async (ideaId: string): Promise<VerifyAccessResponse> => {
     const response = await apiClient.get(`/payments/verify/${ideaId}`);
+    return response.data;
+  },
+  getPaymentStatus: async (ideaId: string): Promise<PaymentStatusResponse> => {
+    const response = await apiClient.get(`/payments/status/${ideaId}`);
     return response.data;
   },
 };

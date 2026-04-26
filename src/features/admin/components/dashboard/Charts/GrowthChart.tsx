@@ -1,3 +1,4 @@
+// ============ src/features/admin/components/dashboard/charts/GrowthChart.tsx ============
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

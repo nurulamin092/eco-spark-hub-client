@@ -46,4 +46,11 @@ export interface ApiErrorResponse {
   error?: unknown;
 }
 
+export interface CommentsResponse {
+  success: boolean;
+  message: string;
+  data: Comment[];
+}
+
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type CommentsApiResponse = ApiResponse<Comment[]>;

@@ -7,7 +7,6 @@ import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import { StatsGrid } from "./stats/StatsGrid";
 import { GrowthChart, RevenueChart } from "./charts";
 import { PendingIdeasTable, TopIdeasTable } from "./tables";
-import { RecentReportsTable } from "../reports/RecentReportsTable";
 import { SystemHealthWidget } from "./health/SystemHealthWidget";
 
 const defaultStats = {
@@ -24,7 +23,6 @@ export function AdminDashboardShell() {
     analytics,
     pendingIdeas,
     topIdeas,
-    recentReports,
     systemHealth,
     isLoading,
     error,
@@ -35,9 +33,7 @@ export function AdminDashboardShell() {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Failed to load dashboard data. Please try again later.
-        </AlertDescription>
+        <AlertDescription>Failed to load dashboard data.</AlertDescription>
       </Alert>
     );
   }
@@ -45,12 +41,10 @@ export function AdminDashboardShell() {
   return (
     <div className="space-y-6">
       <StatsGrid stats={stats || defaultStats} isLoading={isLoading} />
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GrowthChart data={analytics?.ideas || []} isLoading={isLoading} />
         <RevenueChart data={analytics?.revenue || []} isLoading={isLoading} />
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PendingIdeasTable
           ideas={pendingIdeas || []}
@@ -59,12 +53,7 @@ export function AdminDashboardShell() {
         />
         <TopIdeasTable ideas={topIdeas || []} isLoading={isLoading} />
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentReportsTable
-          reports={recentReports || []}
-          isLoading={isLoading}
-        />
         <SystemHealthWidget health={systemHealth!} isLoading={isLoading} />
       </div>
     </div>

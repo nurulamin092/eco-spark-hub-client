@@ -1,3 +1,4 @@
+// ============ src/app/(dashboard)/admin/page.tsx ============
 "use client";
 
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
@@ -15,9 +16,8 @@ export default function AdminPage() {
     );
   }
 
-  if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
+  if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN"))
     return null;
-  }
 
   return <AdminDashboardShell />;
 }

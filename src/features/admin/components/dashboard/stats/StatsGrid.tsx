@@ -20,9 +20,7 @@ interface StatsGridProps {
 }
 
 export function StatsGrid({ stats, isLoading }: StatsGridProps) {
-  if (isLoading) {
-    return <StatsSkeleton />;
-  }
+  if (isLoading) return <StatsSkeleton />;
 
   return (
     <>
@@ -48,7 +46,6 @@ export function StatsGrid({ stats, isLoading }: StatsGridProps) {
           icon={Flag}
         />
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
           title="Approved"

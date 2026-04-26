@@ -1,3 +1,4 @@
+// ============ src/features/admin/components/dashboard/tables/PendingIdeasRow.tsx ============
 "use client";
 
 import { useState } from "react";
@@ -13,9 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, Check, X, Loader2 } from "lucide-react";
-import type { PendingIdea } from "@/features/admin/types/admin.types";
-import { useApproveIdea } from "@/features/admin/hooks/mutations/useApproveIdea";
-import { useRejectIdea } from "@/features/admin/hooks/mutations/useRejectIdea";
+import type { PendingIdea } from "../../../types/admin.types";
+import { useApproveIdea } from "../../../hooks/mutations/useApproveIdea";
+import { useRejectIdea } from "../../../hooks/mutations/useRejectIdea";
 
 interface PendingIdeasRowProps {
   idea: PendingIdea;
@@ -28,31 +29,19 @@ export function PendingIdeasRow({
 }: PendingIdeasRowProps) {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [feedback, setFeedback] = useState("");
-
   const { mutateAsync: approve, isPending: isApproving } = useApproveIdea();
   const { mutateAsync: reject, isPending: isRejecting } = useRejectIdea();
 
   const handleApprove = async () => {
-    try {
-      await approve(idea.id);
-      onActionComplete();
-    } catch (error) {
-      // Error is handled by the mutation's onError
-      console.error("Approve failed:", error);
-    }
+    await approve(idea.id);
+    onActionComplete();
   };
-
   const handleReject = async () => {
     if (!feedback.trim()) return;
-
-    try {
-      await reject({ ideaId: idea.id, feedback });
-      setShowRejectDialog(false);
-      setFeedback("");
-      onActionComplete();
-    } catch (error) {
-      console.error("Reject failed:", error);
-    }
+    await reject({ ideaId: idea.id, feedback });
+    setShowRejectDialog(false);
+    setFeedback("");
+    onActionComplete();
   };
 
   const isPending = isApproving || isRejecting;
@@ -70,7 +59,6 @@ export function PendingIdeasRow({
             </span>
           </div>
         </div>
-
         <div className="flex items-center gap-2 ml-4">
           <Link href={`/admin/ideas/${idea.id}`}>
             <Button size="sm" variant="outline" disabled={isPending}>
@@ -78,7 +66,6 @@ export function PendingIdeasRow({
               Review
             </Button>
           </Link>
-
           <Button
             size="sm"
             variant="default"
@@ -93,7 +80,6 @@ export function PendingIdeasRow({
             )}
             Approve
           </Button>
-
           <Button
             size="sm"
             variant="destructive"
@@ -110,34 +96,24 @@ export function PendingIdeasRow({
         </div>
       </div>
 
-      {/* Reject Dialog */}
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Reject Idea</DialogTitle>
             <DialogDescription>
-              Please provide feedback to the author explaining why this idea is
-              being rejected. This feedback will be visible to the author.
+              Provide feedback to the author
             </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <Textarea
-              placeholder="Enter your feedback here..."
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              rows={5}
-              className="resize-none"
-            />
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
+          <Textarea
+            placeholder="Enter your feedback here..."
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            rows={4}
+          />
+          <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => {
-                setShowRejectDialog(false);
-                setFeedback("");
-              }}
+              onClick={() => setShowRejectDialog(false)}
             >
               Cancel
             </Button>

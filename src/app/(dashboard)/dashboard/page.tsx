@@ -1,4 +1,4 @@
-
+// ============ src/app/(dashboard)/dashboard/page.tsx ============
 "use client";
 
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Lightbulb, TrendingUp, Eye } from "lucide-react";
+import { Loader2, Lightbulb, TrendingUp, Eye, Bookmark } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -23,9 +23,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const stats = [
     {
@@ -38,7 +36,7 @@ export default function DashboardPage() {
     {
       title: "Bookmarks",
       value: "0",
-      icon: Eye,
+      icon: Bookmark,
       href: "/member/bookmarks",
       color: "text-blue-500",
     },
@@ -49,11 +47,17 @@ export default function DashboardPage() {
       href: "#",
       color: "text-green-500",
     },
+    {
+      title: "Profile",
+      value: "Edit",
+      icon: Eye,
+      href: "/member/profile",
+      color: "text-purple-500",
+    },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
       <div className="bg-linear-to-r from-primary/10 via-primary/5 to-transparent rounded-lg p-6">
         <h1 className="text-3xl font-bold tracking-tight">
           Welcome back, {user.name}!
@@ -63,8 +67,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
@@ -82,7 +85,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Activity */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
