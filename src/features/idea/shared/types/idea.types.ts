@@ -41,6 +41,7 @@ export interface Idea {
   publishedAt: string | null;
   author: Author;
   category: Category;
+  adminFeedback?: string | null;
   isLocked?: boolean;
 }
 
@@ -106,7 +107,7 @@ export interface IdeaFilters {
   page?: number;
   limit?: number;
   search?: string;
-  category?: string;   
+  category?: string;
   status?: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
   sort?: "recent" | "top" | "popular" | "commented" | "trending" | "oldest";
 }

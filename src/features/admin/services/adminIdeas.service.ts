@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ============ src/features/admin/services/adminIdeas.service.ts ============
 import { apiClient } from "@/lib/api/base";
 
 export const adminIdeasService = {
   approveIdea: async (ideaId: string): Promise<void> => {
-    await apiClient.patch(`/admin/ideas/${ideaId}/approve`);
+    await apiClient.patch(`/ideas/${ideaId}/approve`);
   },
 
   rejectIdea: async (ideaId: string, feedback: string): Promise<void> => {
-    await apiClient.patch(`/admin/ideas/${ideaId}/reject`, { feedback });
+    await apiClient.patch(`/ideas/${ideaId}/reject`, { feedback });
   },
 
   bulkApprove: async (ideaIds: string[]): Promise<{ count: number }> => {
@@ -26,5 +27,9 @@ export const adminIdeasService = {
       feedback,
     });
     return response.data.data;
+  },
+  getPendingIdeas: async (): Promise<any> => {
+    const response = await apiClient.get("/admin/ideas/pending");
+    return response.data;
   },
 };
