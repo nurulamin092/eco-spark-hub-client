@@ -1,6 +1,7 @@
+// ============ src/features/comment/components/CommentForm.tsx ============
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,19 +26,10 @@ export function CommentForm({
 }: CommentFormProps) {
   const { user, isAuthenticated } = useAuth();
   const [content, setContent] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { mutateAsync, isPending } = useCreateComment(ideaId);
 
-  useEffect(() => {
-    if (textareaRef.current && isFocused) {
-      textareaRef.current.focus();
-    }
-  }, [isFocused]);
-
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async () => {
     if (!content.trim()) return;
-
     try {
       await mutateAsync({ content, ideaId, parentId });
       setContent("");
@@ -46,7 +38,7 @@ export function CommentForm({
     } catch {
       // Error handled by mutation
     }
-  }, [content, ideaId, parentId, mutateAsync, onSuccess, onCancel]);
+  };
 
   if (!isAuthenticated) {
     return (
@@ -77,19 +69,16 @@ export function CommentForm({
             </div>
           )}
           <Textarea
-            ref={textareaRef}
             placeholder={
               parentAuthorName ? `Write your reply...` : "Write a comment..."
             }
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            onFocus={() => setIsFocused(true)}
             className="min-h-20 resize-y"
             disabled={isPending}
           />
         </div>
       </div>
-
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button
@@ -107,16 +96,8 @@ export function CommentForm({
           onClick={handleSubmit}
           disabled={isPending || !content.trim()}
         >
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-              Posting...
-            </>
-          ) : parentAuthorName ? (
-            "Reply"
-          ) : (
-            "Post Comment"
-          )}
+          {isPending && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+          {parentAuthorName ? "Reply" : "Post Comment"}
         </Button>
       </div>
     </div>

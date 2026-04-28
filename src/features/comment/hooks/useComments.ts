@@ -3,7 +3,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { commentService } from "../services/comment.service";
-import { Comment } from "../types/comment.types";
+import type { Comment } from "../types/comment.types";
 
 export const commentKeys = {
   all: ["comments"] as const,
@@ -14,27 +14,24 @@ export function useComments(ideaId: string) {
   return useQuery({
     queryKey: commentKeys.byIdea(ideaId),
     queryFn: async (): Promise<Comment[]> => {
-      const response = await commentService.getByIdea(ideaId);
+      console.log("🔍 [useComments] Fetching comments for idea:", ideaId);
+      const comments = await commentService.getByIdea(ideaId);
+      console.log("✅ [useComments] Comments received:", comments);
+      console.log("📊 [useComments] Comment count:", comments.length);
 
-      const extractComments = (data: unknown): Comment[] => {
-        if (!data) return [];
-
-        // Direct array
-        if (Array.isArray(data)) return data;
-
-        // Object with data property
-        if (typeof data === "object" && data !== null) {
-          const obj = data as { data?: unknown; comments?: unknown };
-          if (Array.isArray(obj.data)) return obj.data;
-          if (Array.isArray(obj.comments)) return obj.comments;
-        }
-
-        return [];
-      };
-
-      return extractComments(response);
+      // Ensure each comment has required fields for UI
+      return comments.map((comment) => ({
+        ...comment,
+        user: comment.user || {
+          id: comment.userId,
+          name: "Anonymous",
+          image: null,
+        },
+        replies: comment.replies || [],
+      }));
     },
     enabled: !!ideaId,
     staleTime: 30 * 1000,
+    retry: 1,
   });
 }

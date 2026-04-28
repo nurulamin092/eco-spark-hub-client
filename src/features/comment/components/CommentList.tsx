@@ -1,53 +1,99 @@
 // ============ src/features/comment/components/CommentList.tsx ============
 "use client";
 
-import { CommentThread } from "./CommentThread";
+import { useState, useCallback } from "react";
 import { CommentForm } from "./CommentForm";
+import { CommentItem } from "./CommentItem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, MessageCircle } from "lucide-react";
+import { AlertCircle, Loader2, MessageCircle } from "lucide-react";
 import { useComments } from "../hooks/useComments";
-import { Comment, CommentsResponse } from "../types/comment.types";
-import { ReactElement } from "react";
+import type { Comment } from "../types/comment.types";
+import { useAuth } from "@/features/auth/shared/hooks/useAuth";
 
 interface CommentListProps {
   ideaId: string;
 }
 
-export function CommentList({ ideaId }: CommentListProps): ReactElement {
-  const { data, isLoading, error } = useComments(ideaId);
+export function CommentList({ ideaId }: CommentListProps) {
+  const { isAuthenticated } = useAuth();
+  const { data: comments, isLoading, error, refetch } = useComments(ideaId);
+  const [isRefetching, setIsRefetching] = useState(false);
 
-  // ✅ Safe data extraction with proper typing
-  let comments: Comment[] = [];
+  // Build comment tree from flat list
+  const buildCommentTree = useCallback((flatComments: Comment[]): Comment[] => {
+    const commentMap = new Map<string, Comment>();
+    const roots: Comment[] = [];
 
-  if (data) {
-    // Case 1: data is directly an array
-    if (Array.isArray(data)) {
-      comments = data;
+    // First, create a map of all comments
+    flatComments.forEach((comment) => {
+      commentMap.set(comment.id, { ...comment, replies: [] });
+    });
+
+    // Then, build the tree structure
+    flatComments.forEach((comment) => {
+      const commentWithReplies = commentMap.get(comment.id)!;
+      if (comment.parentId && commentMap.has(comment.parentId)) {
+        const parent = commentMap.get(comment.parentId)!;
+        if (!parent.replies) parent.replies = [];
+        parent.replies.push(commentWithReplies);
+      } else {
+        roots.push(commentWithReplies);
+      }
+    });
+
+    // Sort roots by createdAt (oldest first)
+    roots.sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    // Sort replies within each comment
+    const sortReplies = (commentArray: Comment[]) => {
+      commentArray.forEach((comment) => {
+        if (comment.replies && comment.replies.length > 0) {
+          comment.replies.sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+          sortReplies(comment.replies);
+        }
+      });
+    };
+    sortReplies(roots);
+
+    return roots;
+  }, []);
+
+  const getComments = useCallback((responseData: unknown): Comment[] => {
+    if (!responseData) return [];
+    if (Array.isArray(responseData)) return responseData;
+    if (typeof responseData === "object" && responseData !== null) {
+      const obj = responseData as Record<string, unknown>;
+      if (Array.isArray(obj.data)) return obj.data as Comment[];
+      if (Array.isArray(obj.comments)) return obj.comments as Comment[];
     }
-    // Case 2: data has data property that is array (ApiResponse format)
-    else if (
-      typeof data === "object" &&
-      "data" in data &&
-      Array.isArray((data as CommentsResponse).data)
-    ) {
-      comments = (data as CommentsResponse).data;
-    }
-    // Case 3: data has comments property that is array
-    else if (
-      typeof data === "object" &&
-      "comments" in data &&
-      Array.isArray((data as { comments: Comment[] }).comments)
-    ) {
-      comments = (data as { comments: Comment[] }).comments;
-    }
-  }
+    return [];
+  }, []);
 
-  // ✅ Ensure comments is always an array
-  const safeComments = Array.isArray(comments) ? comments : [];
+  const flatComments = getComments(comments);
+  const commentTree = buildCommentTree(flatComments);
+  const totalComments = flatComments.length;
 
-  const topLevelComments = safeComments.filter((c: Comment) => !c.parentId);
-  const totalComments = safeComments.length;
+  // ✅ Refresh function with loading state
+  const handleRefresh = useCallback(async () => {
+    setIsRefetching(true);
+    await refetch();
+    setIsRefetching(false);
+  }, [refetch]);
+
+  // ✅ Handle comment post success
+  const handleCommentSuccess = useCallback(() => {
+    handleRefresh();
+  }, [handleRefresh]);
+
+  // ✅ Handle reply success
+  const handleReplySuccess = useCallback(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   if (isLoading) {
     return (
@@ -90,20 +136,30 @@ export function CommentList({ ideaId }: CommentListProps): ReactElement {
           <h3 className="font-semibold">
             {totalComments} {totalComments === 1 ? "Comment" : "Comments"}
           </h3>
+          {isRefetching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
       </div>
 
-      <CommentForm ideaId={ideaId} />
+      {isAuthenticated && (
+        <CommentForm ideaId={ideaId} onSuccess={handleCommentSuccess} />
+      )}
 
-      {topLevelComments.length === 0 ? (
+      {commentTree.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p>No comments yet. Be the first to share your thoughts!</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {topLevelComments.map((comment: Comment) => (
-            <CommentThread key={comment.id} comment={comment} ideaId={ideaId} />
+        <div className="space-y-5">
+          {commentTree.map((comment) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              ideaId={ideaId}
+              onReplySuccess={handleReplySuccess}
+              onDeleteSuccess={handleRefresh}
+              onEditSuccess={handleRefresh}
+            />
           ))}
         </div>
       )}

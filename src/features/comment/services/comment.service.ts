@@ -4,64 +4,51 @@ import {
   CreateCommentPayload,
   UpdateCommentPayload,
   Comment,
-  ApiResponse,
-  ApiSuccessResponse,
-  ApiErrorResponse,
 } from "../types/comment.types";
-
-function isSuccessResponse<T>(
-  response: unknown,
-): response is ApiSuccessResponse<T> {
-  return (
-    typeof response === "object" &&
-    response !== null &&
-    "success" in response &&
-    (response as { success: unknown }).success === true
-  );
-}
 
 export const commentService = {
   getByIdea: async (ideaId: string): Promise<Comment[]> => {
-    const { data } = await apiClient.get("/comments", { params: { ideaId } });
+    try {
+      const response = await apiClient.get("/comments", {
+        params: { ideaId },
+      });
 
-    if (Array.isArray(data)) return data;
-    if (data?.data && Array.isArray(data.data)) return data.data;
-    if (data?.comments && Array.isArray(data.comments)) return data.comments;
+      console.log("Raw API Response:", response.data);
 
-    return [];
+      const responseData = response.data;
+
+      if (responseData?.data?.data && Array.isArray(responseData.data.data)) {
+        return responseData.data.data;
+      }
+
+      if (responseData?.data && Array.isArray(responseData.data)) {
+        return responseData.data;
+      }
+
+      if (Array.isArray(responseData)) {
+        return responseData;
+      }
+
+      console.warn("Unexpected response format:", responseData);
+      return [];
+    } catch (error) {
+      console.error("Failed to fetch comments:", error);
+      return [];
+    }
   },
 
   create: async (payload: CreateCommentPayload): Promise<Comment> => {
-    const { data } = await apiClient.post<ApiResponse<Comment>>(
-      "/comments",
-      payload,
-    );
+    const response = await apiClient.post("/comments", payload);
 
-    if (isSuccessResponse(data)) {
-      return data.data;
-    }
-
-    throw new Error(
-      (data as ApiErrorResponse)?.message || "Failed to create comment",
-    );
+    return response.data?.data || response.data;
   },
 
   update: async (
     id: string,
     payload: UpdateCommentPayload,
   ): Promise<Comment> => {
-    const { data } = await apiClient.patch<ApiResponse<Comment>>(
-      `/comments/${id}`,
-      payload,
-    );
-
-    if (isSuccessResponse(data)) {
-      return data.data;
-    }
-
-    throw new Error(
-      (data as ApiErrorResponse)?.message || "Failed to update comment",
-    );
+    const response = await apiClient.patch(`/comments/${id}`, payload);
+    return response.data?.data || response.data;
   },
 
   delete: async (id: string): Promise<void> => {
