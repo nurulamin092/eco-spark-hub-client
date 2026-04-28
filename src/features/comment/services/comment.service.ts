@@ -17,20 +17,21 @@ export const commentService = {
 
       const responseData = response.data;
 
+      let comments: Comment[] = [];
+
       if (responseData?.data?.data && Array.isArray(responseData.data.data)) {
-        return responseData.data.data;
+        comments = responseData.data.data;
+      } else if (responseData?.data && Array.isArray(responseData.data)) {
+        comments = responseData.data;
+      } else if (Array.isArray(responseData)) {
+        comments = responseData;
       }
 
-      if (responseData?.data && Array.isArray(responseData.data)) {
-        return responseData.data;
-      }
+      console.log("Extracted comments:", comments);
+      console.log("First comment replies:", comments[0]?.replies);
+      console.log("Replies count:", comments[0]?.replies?.length);
 
-      if (Array.isArray(responseData)) {
-        return responseData;
-      }
-
-      console.warn("Unexpected response format:", responseData);
-      return [];
+      return comments;
     } catch (error) {
       console.error("Failed to fetch comments:", error);
       return [];
