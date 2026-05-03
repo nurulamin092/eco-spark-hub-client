@@ -1,7 +1,9 @@
+// ============ src/features/idea/my-ideas/components/MyIdeasList.tsx ============
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -11,20 +13,68 @@ import { MyIdeasFilters } from "./MyIdeasFilters";
 import { useMyIdeas } from "../hooks/useMyIdeas";
 import { IdeaStatus } from "../types/my-ideas.types";
 
+// ✅ Debounce hook তৈরি করুন
+function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export function MyIdeasList() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<IdeaStatus | "ALL">("ALL");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ✅ URL থেকে initial filters নিন
+  const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
+  const [search, setSearch] = useState(() => searchParams.get("search") || "");
+  const [status, setStatus] = useState<IdeaStatus | "ALL">(
+    () => (searchParams.get("status") as IdeaStatus | "ALL") || "ALL",
+  );
+
   const limit = 10;
 
-  const statusFilter = status === "ALL" ? undefined : status;
+  // ✅ Debounced search (500ms delay)
+  const debouncedSearch = useDebounce(search, 500);
 
-  const { data, isLoading, error, refetch } = useMyIdeas({
-    page,
-    limit,
-    search: search || undefined,
-    status: statusFilter,
-  });
+  // ✅ Memoize filters to prevent unnecessary re-renders
+  const filters = useMemo(
+    () => ({
+      page,
+      limit,
+      search: debouncedSearch || undefined,
+      status: status === "ALL" ? undefined : status,
+    }),
+    [page, debouncedSearch, status],
+  );
+
+  // ✅ React Query hook
+  const { data, isLoading, error, refetch, isFetching } = useMyIdeas(filters);
+
+  // ✅ URL update when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (page > 1) params.set("page", String(page));
+    if (search) params.set("search", search);
+    if (status !== "ALL") params.set("status", status);
+
+    const newUrl = params.toString() ? `?${params.toString()}` : "";
+    router.replace(`/member/ideas${newUrl}`, { scroll: false });
+  }, [page, search, status, router]);
+
+  const handleStatusChange = useCallback((newStatus: IdeaStatus | "ALL") => {
+    setStatus(newStatus);
+    setPage(1); // ✅ Reset to first page on filter change
+  }, []);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    setPage(1); // ✅ Reset to first page on search
+  }, []);
 
   const handleRefresh = useCallback(() => {
     refetch();
@@ -35,6 +85,7 @@ export function MyIdeasList() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  // Loading state (first load)
   if (isLoading && page === 1) {
     return (
       <div className="space-y-4">
@@ -45,6 +96,7 @@ export function MyIdeasList() {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <Alert variant="destructive">
@@ -61,8 +113,11 @@ export function MyIdeasList() {
     meta: { page: 1, limit: 10, total: 0, totalPages: 0 },
   };
 
+  const isLoadingMore = isFetching && page > 1;
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">My Ideas</h1>
@@ -78,14 +133,23 @@ export function MyIdeasList() {
         </Link>
       </div>
 
+      {/* Filters */}
       <MyIdeasFilters
         search={search}
         status={status}
-        onSearchChange={setSearch}
-        onStatusChange={setStatus}
+        onSearchChange={handleSearchChange}
+        onStatusChange={handleStatusChange}
       />
 
-      {ideas.length === 0 ? (
+      {/* Loading more indicator */}
+      {isLoadingMore && (
+        <div className="flex justify-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoadingMore && ideas.length === 0 ? (
         <div className="text-center py-12 border rounded-lg">
           <p className="text-muted-foreground mb-4">No ideas found</p>
           <Link href="/member/ideas/create">
@@ -94,19 +158,21 @@ export function MyIdeasList() {
         </div>
       ) : (
         <>
+          {/* Ideas list */}
           <div className="space-y-4">
             {ideas.map((idea) => (
               <MyIdeaCard key={idea.id} idea={idea} onRefresh={handleRefresh} />
             ))}
           </div>
 
+          {/* Pagination */}
           {meta.totalPages > 1 && (
             <div className="flex justify-center gap-2 pt-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(meta.page - 1)}
-                disabled={meta.page <= 1}
+                disabled={meta.page <= 1 || isFetching}
               >
                 Previous
               </Button>
@@ -117,14 +183,14 @@ export function MyIdeasList() {
                 variant="outline"
                 size="sm"
                 onClick={() => handlePageChange(meta.page + 1)}
-                disabled={meta.page >= meta.totalPages}
+                disabled={meta.page >= meta.totalPages || isFetching}
               >
                 Next
               </Button>
             </div>
           )}
         </>
-      )}  
+      )}
     </div>
   );
 }

@@ -1,3 +1,6 @@
+// ============ src/features/admin/types/admin.types.ts ============
+import { PaginationMeta } from "@/features/idea/shared/types/idea.types";
+
 export interface DashboardStats {
   users: number;
   ideas: number;
@@ -85,6 +88,46 @@ export interface Member {
     role: string;
     status: string;
   };
+}
+
+
+export interface AdminIdea {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  status: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+  upvoteCount: number;
+  downvoteCount: number;
+  viewCount: number;
+  commentCount: number;
+  isPaid: boolean;
+  price: number | null;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  category: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface AdminIdeasFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+  sortBy?: "createdAt" | "updatedAt" | "upvoteCount";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface PaginatedResponse<T> {
+  meta: PaginationMeta;
+  data: T[];
 }
 export interface ApiResponse<T = unknown> {
   success: boolean;

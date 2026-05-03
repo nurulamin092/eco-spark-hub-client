@@ -72,16 +72,18 @@ export interface UpdateIdeaPayload {
   status?: "DRAFT" | "UNDER_REVIEW";
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface IdeasResponse {
   success: boolean;
   message: string;
   data: {
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
+    meta: PaginationMeta;
     data: Idea[];
   };
 }
@@ -111,16 +113,18 @@ export interface IdeaFilters {
   status?: "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
   sort?: "recent" | "top" | "popular" | "commented" | "trending" | "oldest";
 }
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface MyIdeasResponse {
   success: boolean;
   message: string;
   data: {
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
+    meta: PaginationMeta;
     data: Idea[];
   };
 }

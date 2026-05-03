@@ -16,22 +16,37 @@ export function useRejectIdea() {
 
   return useMutation({
     mutationFn: async ({ ideaId, feedback }: RejectIdeaParams) => {
+      console.log(`🚀 [useRejectIdea] Rejecting idea: ${ideaId}`);
       await adminIdeasService.rejectIdea(ideaId, feedback);
-      return { success: true };
+      return { success: true, ideaId };
     },
     onSuccess: (_, { ideaId }) => {
-      // Invalidate affected queries
+      console.log(`✅ [useRejectIdea] Success for idea: ${ideaId}`);
+
+      queryClient.invalidateQueries({ queryKey: ["admin-ideas"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "pending-ideas"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "idea", ideaId] });
-      queryClient.invalidateQueries({ queryKey: ["ideas", "list"] });
-      queryClient.invalidateQueries({ queryKey: ["ideas", "detail", ideaId] });
 
       toast.success("Idea rejected successfully");
     },
     onError: (error: any) => {
-      const errorMessage =
-        error.response?.data?.message || "Failed to reject idea";
+      console.error(`❌ [useRejectIdea] Error:`, error);
+
+      let errorMessage = "Failed to reject idea";
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      if (errorMessage.includes("UNDER_REVIEW")) {
+        errorMessage =
+          "This idea is not pending review. It may have been already approved or rejected.";
+      } else if (errorMessage.includes("Feedback")) {
+        errorMessage = "Feedback is required to reject an idea.";
+      }
+
       toast.error(errorMessage);
     },
   });

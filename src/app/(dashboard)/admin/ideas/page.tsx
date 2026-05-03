@@ -1,18 +1,25 @@
-import { MyIdeasList } from "@/features/idea/my-ideas/components/MyIdeasList";
+// ============ src/app/(dashboard)/admin/ideas/page.tsx ============
 import { Metadata } from "next";
-import { requireAuth } from "@/lib/api/auth.guard";
+import { requireAdmin } from "@/lib/api/auth.guard";
+import { AllIdeasTable } from "@/features/admin/components/ideas/AllIdeasTable";
 
 export const metadata: Metadata = {
-  title: "My Ideas | EcoSpark Hub",
-  description: "Manage your submitted ideas",
+  title: "All Ideas | Admin Dashboard",
+  description: "Manage all ideas on the platform",
 };
 
-export default async function MyIdeasPage() {
-  await requireAuth();
+export default async function AdminAllIdeasPage() {
+  await requireAdmin();
 
   return (
-    <div className="container max-w-4xl mx-auto py-10 px-4">
-      <MyIdeasList />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">All Ideas</h1>
+        <p className="text-muted-foreground">
+          View and manage all submitted ideas
+        </p>
+      </div>
+      <AllIdeasTable />
     </div>
   );
 }

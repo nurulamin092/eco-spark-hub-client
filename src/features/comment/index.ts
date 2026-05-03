@@ -1,6 +1,5 @@
 export { CommentList } from "./components/CommentList";
 export { CommentItem } from "./components/CommentItem";
-export { CommentThread } from "./components/CommentThread";
 export { CommentForm } from "./components/CommentForm";
 export { CommentSkeleton } from "./components/CommentSkeleton";
 export { useComments } from "./hooks/useComments";
