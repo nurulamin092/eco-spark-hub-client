@@ -92,34 +92,6 @@ class AdminService {
     await apiClient.patch(`/admin/members/${memberId}/deactivate`);
   }
 
-  // Idea Moderation
-  async approveIdea(ideaId: string): Promise<void> {
-    await apiClient.patch(`/admin/ideas/${ideaId}/approve`);
-  }
-
-  async rejectIdea(ideaId: string, feedback: string): Promise<void> {
-    await apiClient.patch(`/admin/ideas/${ideaId}/reject`, { feedback });
-  }
-
-  async bulkApproveIdeas(ideaIds: string[]): Promise<{ count: number }> {
-    const response = await apiClient.post("/admin/ideas/bulk/approve", {
-      ids: ideaIds,
-    });
-    return response.data.data;
-  }
-
-  async bulkRejectIdeas(
-    ideaIds: string[],
-    feedback: string,
-  ): Promise<{ count: number }> {
-    const response = await apiClient.post("/admin/ideas/bulk/reject", {
-      ids: ideaIds,
-      feedback,
-    });
-    return response.data.data;
-  }
-
-  // Export
   async exportUsers(format: "csv" | "json" = "csv"): Promise<Blob> {
     const response = await apiClient.get(
       `/admin/export/users?format=${format}`,

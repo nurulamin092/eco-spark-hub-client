@@ -39,7 +39,7 @@ const memberNavItems = [
 const adminNavItems = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { title: "Categories", href: "/admin/categories", icon: FolderTree },
-  { title: "Users", href: "/admin/users", icon: Users },
+  { title: "User", href: "/admin/users", icon: Users },
   { title: "Ideas", href: "/admin/ideas", icon: Lightbulb },
   { title: "Reports", href: "/admin/reports", icon: Shield },
   { title: "Settings", href: "/admin/settings", icon: Settings },
