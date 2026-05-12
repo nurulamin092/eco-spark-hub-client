@@ -148,7 +148,7 @@ export function useAuth(): UseAuthReturn {
     }
   }, [serverUnhealthy, debouncedRefetch]);
 
-  // ✅ LOGIN MUTATION - Fixed
+  //  LOGIN MUTATION - Fixed
   const loginMutation = useMutation({
     mutationFn: (payload: { email: string; password: string }) =>
       authApi.login(payload),
@@ -183,7 +183,7 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
-  // ✅ REGISTER MUTATION - Fixed
+  //  REGISTER MUTATION - Fixed
   const registerMutation = useMutation({
     mutationFn: (payload: { name: string; email: string; password: string }) =>
       authApi.register(payload),
@@ -217,86 +217,95 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
-  // ✅ SUPER ROBUST LOGOUT MUTATION
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      console.log("📤 [useAuth] Starting logout process...");
+      console.log(" [DEBUG] Starting logout process...");
+      console.log(" [DEBUG] Current cookies BEFORE:", document.cookie);
 
-      // IMMEDIATE: Clear React Query cache first
+      // Step 1: Clear React Query cache
       queryClient.clear();
+      console.log(" [DEBUG] Query cache cleared");
 
-      // IMMEDIATE: Force clear all cookies from client side
-      if (typeof document !== "undefined") {
-        const cookiesToDelete = [
-          "accessToken",
-          "refreshToken",
-          "userRole",
-          "role",
-          "better-auth.session_token",
-          "token",
-        ];
-
-        // Multiple path variations to ensure complete cleanup
-        const paths = ["/", "/admin", "/dashboard", "/member", "/api"];
-
-        cookiesToDelete.forEach((name) => {
-          paths.forEach((path) => {
-            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
-            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; domain=localhost`;
-          });
-        });
-
-        console.log("🗑️ All cookies force cleared from client");
+      // Step 2: Call logout API
+      try {
+        console.log(" [DEBUG] Calling logout API...");
+        const response = await authApi.logout();
+        console.log(" [DEBUG] Logout API response:", response);
+      } catch (apiError) {
+        console.warn(" [DEBUG] Logout API error:", apiError);
       }
 
-      // Clear all storage
+      // Step 3: Wait a bit for backend processing
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      console.log(" [DEBUG] Waited 200ms for backend");
+
+      // Step 4: Aggressive client-side cookie clearing
+      console.log(" [DEBUG] Clearing client-side cookies...");
+
+      const allCookies = [
+        "accessToken",
+        "refreshToken",
+        "better-auth.session_token",
+        "token",
+        "userRole",
+        "role",
+      ];
+
+      // Get all existing cookies
+      const existingCookies = document.cookie
+        .split(";")
+        .map((c) => c.split("=")[0].trim());
+      const cookiesToClear = [...new Set([...allCookies, ...existingCookies])];
+
+      console.log(" [DEBUG] Cookies to clear:", cookiesToClear);
+
+      // Clear each cookie with multiple strategies
+      cookiesToClear.forEach((name) => {
+        if (!name) return;
+
+        // Strategy 1: Basic expiration
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+
+        // Strategy 2: max-age=0
+        document.cookie = `${name}=; max-age=0; path=/;`;
+
+        // Strategy 3: SameSite=Lax
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax;`;
+
+        // Strategy 4: Domain variation for localhost
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost;`;
+
+        // Strategy 5: Different paths
+        ["/api", "/admin", "/dashboard"].forEach((path) => {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
+        });
+      });
+
+      console.log(" [DEBUG] Cookies AFTER clearing:", document.cookie);
+
+      // Step 5: Clear all storage
       if (typeof sessionStorage !== "undefined") {
         sessionStorage.clear();
+        console.log(" [DEBUG] Session storage cleared");
       }
       if (typeof localStorage !== "undefined") {
         localStorage.clear();
+        console.log(" [DEBUG] Local storage cleared");
       }
 
-      // Call API logout (fire and forget - don't wait)
-      authApi.logout().catch((err) => {
-        console.warn("API logout error (ignored):", err);
-      });
+      console.log(" [DEBUG] Logout cleanup completed");
     },
     onSuccess: () => {
-      console.log("✅ [useAuth] Logout successful");
+      console.log(" [DEBUG] Logout successful, redirecting...");
       toast.success("Logged out successfully");
-
-      // Double-check cookies are cleared before navigation
-      const checkCookies = () => {
-        const hasAuthCookies =
-          document.cookie.includes("userRole") ||
-          document.cookie.includes("accessToken");
-        if (hasAuthCookies) {
-          console.warn("Some cookies still present, clearing again...");
-          const cookiesToDelete = [
-            "accessToken",
-            "refreshToken",
-            "userRole",
-            "role",
-          ];
-          cookiesToDelete.forEach((name) => {
-            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-          });
-        }
-      };
-
-      checkCookies();
-
-      // Use replace to prevent back button issues
-      window.location.replace("/");
+      window.location.replace("/login?t=" + Date.now());
     },
     onError: (error: any) => {
-      console.error("❌ [useAuth] Logout error:", error);
-      // Still navigate even on error - cookies are already cleared
-      window.location.replace("/");
+      console.error(" [DEBUG] Logout error:", error);
+      window.location.replace("/login?t=" + Date.now());
     },
   });
-  // ✅ CHANGE PASSWORD MUTATION
+  //  CHANGE PASSWORD MUTATION
   const changePasswordMutation = useMutation({
     mutationFn: (payload: { currentPassword: string; newPassword: string }) =>
       authApi.changePassword(payload),
@@ -316,7 +325,7 @@ export function useAuth(): UseAuthReturn {
     },
   });
 
-  // ✅ CALLBACKS - All properly memoized
+  //  CALLBACKS - All properly memoized
   const login = useCallback(
     (email: string, password: string) => {
       loginMutation.mutate({ email, password });

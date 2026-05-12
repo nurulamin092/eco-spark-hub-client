@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ============ src/lib/api/auth.api.ts ============
-import { apiClient } from "./base";
+import { apiClient, deleteCookie } from "./base";
 import type {
   User,
   AuthResponse,
@@ -17,15 +17,14 @@ export type {
   RegisterPayload,
   ChangePasswordPayload,
 };
+
+// Force clear all auth cookies with aggressive strategy
 const forceClearAllAuthCookies = () => {
   if (typeof document === "undefined") return;
 
   console.log("🗑️ Force clearing all auth cookies...");
 
-  // Multiple path variations to ensure complete cleanup
-  const paths = ["/", "/admin", "/dashboard", "/member"];
-  const domains = ["", "; domain=localhost", "; domain=.localhost"];
-
+  // Complete list of cookies to clear
   const cookiesToDelete = [
     "accessToken",
     "refreshToken",
@@ -35,17 +34,27 @@ const forceClearAllAuthCookies = () => {
     "token",
     "__Secure-next-auth.session-token",
     "next-auth.session-token",
+    "connect.sid",
+    "session",
   ];
 
+  // Multiple clearing strategies
   cookiesToDelete.forEach((cookieName) => {
-    paths.forEach((path) => {
-      domains.forEach((domain) => {
-        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};${domain}`;
-      });
+    // Standard delete
+    deleteCookie(cookieName);
+
+    // Clear with different paths
+    ["/", "/api", "/admin", "/dashboard", "/member"].forEach((path) => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}; SameSite=Lax;`;
     });
+
+    // Clear with domain variations for localhost
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost;`;
+    document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.localhost;`;
   });
 
-  console.log("✅ All auth cookies force cleared");
+  console.log(" All auth cookies force cleared");
 };
 
 class AuthApiService {
@@ -68,80 +77,51 @@ class AuthApiService {
   }
 
   async register(payload: RegisterPayload): Promise<AuthResponse> {
+    console.log(" [auth.api] Register request for:", payload.email);
     const response = await apiClient.post("/auth/register", payload);
+    console.log(" [auth.api] Register response status:", response.status);
     return response.data;
   }
 
   async logout(): Promise<void> {
-    console.log("📤 [auth.api] Starting logout process...");
-
-    // STEP 1: Force clear ALL cookies immediately (critical)
+    console.log(" [auth.api] Starting logout...");
     forceClearAllAuthCookies();
-
-    // STEP 2: Clear all browser storage
-    if (typeof sessionStorage !== "undefined") {
-      sessionStorage.clear();
-      console.log("🗑️ Session storage cleared");
-    }
-
-    if (typeof localStorage !== "undefined") {
-      const authKeys = [
-        "auth-storage",
-        "user",
-        "persist:root",
-        "token",
-        "refreshToken",
-      ];
-      authKeys.forEach((key) => localStorage.removeItem(key));
-      console.log("🗑️ Local storage auth items cleared");
-    }
-
-    // STEP 3: Try API logout (non-blocking)
     try {
-      await Promise.race([
-        apiClient.post("/auth/logout", {}, { timeout: 2000 }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Logout API timeout")), 2000),
-        ),
-      ]);
-      console.log("✅ [auth.api] Logout API successful");
-    } catch (apiError) {
-      // Log but don't throw - cookies already cleared
-      console.warn(
-        "⚠️ [auth.api] Logout API failed, but cookies are already cleared:",
-        apiError,
-      );
+      // Call logout API with longer timeout
+      await apiClient.post("/auth/logout", {}, { timeout: 5000 });
+      console.log(" Logout API successful");
+    } catch (error: any) {
+      console.warn(" Logout API error:", error.message);
+      // Continue with client-side cleanup
     }
 
-    // STEP 4: Double-check cookies are cleared (retry if needed)
-    setTimeout(() => {
-      const remainingCookies = document.cookie;
-      if (
-        remainingCookies.includes("userRole") ||
-        remainingCookies.includes("accessToken")
-      ) {
-        console.warn("⚠️ Some cookies still present, force clearing again...");
-        forceClearAllAuthCookies();
-      } else {
-        console.log("✅ All cookies successfully cleared");
-      }
-    }, 50);
+    // Client-side cookie clearing - aggressive but necessary
+    const cookiesToDelete = [
+      "accessToken",
+      "refreshToken",
+      "better-auth.session_token",
+      "token",
+      "userRole",
+      "role",
+    ];
 
-    // STEP 5: Dispatch auth change event
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("auth-state-change", {
-          detail: { isAuthenticated: false, role: null },
-        }),
-      );
-    }
+    cookiesToDelete.forEach((name) => {
+      // Multiple clearing strategies
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax;`;
+      document.cookie = `${name}=; max-age=0; path=/;`;
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost;`;
+    });
 
-    console.log(" [auth.api] Logout process completed");
+    // Clear storage
+    sessionStorage.clear();
+    localStorage.clear();
+
+    console.log(" Logout complete, cookies:", document.cookie);
   }
-
   async getMe(): Promise<User> {
     try {
-      console.log("📤 [auth.api] Getting current user...");
+      console.log(" [auth.api] Getting current user...");
       const response = await apiClient.get("/auth/me");
 
       if (response.data?.data) {
@@ -157,7 +137,7 @@ class AuthApiService {
       throw new Error("Invalid response structure");
     } catch (error: any) {
       const status = error.response?.status;
-      console.log(`📥 [auth.api] getMe failed with status: ${status}`);
+      console.log(` [auth.api] getMe failed with status: ${status}`);
       throw error;
     }
   }

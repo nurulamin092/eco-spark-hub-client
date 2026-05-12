@@ -11,32 +11,44 @@ interface FailedRequest {
   reject: (reason?: unknown) => void;
 }
 
-// Cookie helper functions - Production grade
-const setCookie = (name: string, value: string, maxAgeDays: number = 7) => {
+// Global cookie helper functions
+const setCookieGlobal = (
+  name: string,
+  value: string,
+  maxAgeDays: number = 7,
+) => {
   if (typeof document === "undefined") return;
 
   const isProduction = process.env.NODE_ENV === "production";
   const expires = new Date();
   expires.setTime(expires.getTime() + maxAgeDays * 24 * 60 * 60 * 1000);
 
-  const cookieParts = [
-    `${name}=${value}`,
-    `expires=${expires.toUTCString()}`,
-    `path=/`,
-    `SameSite=Lax`,
-    `max-age=${maxAgeDays * 24 * 60 * 60}`,
-  ];
+  // For localhost - NO Secure flag, SameSite=Lax
+  const isLocalhost = window.location.hostname === "localhost";
 
-  if (isProduction) {
-    cookieParts.push(`Secure`);
+  let cookieString = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; max-age=${maxAgeDays * 24 * 60 * 60}`;
+
+  // Only add Secure flag in production AND not localhost
+  if (isProduction && !isLocalhost) {
+    cookieString += "; Secure";
   }
 
-  document.cookie = cookieParts.join("; ");
+  document.cookie = cookieString;
+  console.log(`🍪 Cookie set: ${name}`);
 };
 
-const deleteCookie = (name: string) => {
+const deleteCookieGlobal = (name: string) => {
   if (typeof document === "undefined") return;
+
+  // Multiple methods to ensure deletion
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax;`;
+  document.cookie = `${name}=; max-age=0; path=/;`;
+
+  // Also try with domain for localhost
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost;`;
+
+  console.log(`🗑️ Cookie deleted: ${name}`);
 };
 
 // JWT Decode helper with proper error handling
@@ -91,6 +103,8 @@ class ApiClient {
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         // Add token to header for better-auth compatibility
+        config.withCredentials = true;
+
         if (typeof document !== "undefined") {
           const accessToken = this.getCookie("accessToken");
           if (accessToken && config.headers) {
@@ -196,14 +210,14 @@ class ApiClient {
     const decoded = decodeJWT(accessToken);
     const userRole = decoded?.role || data.user?.role || "MEMBER";
 
-    console.log(`✅ [base.ts] User role extracted: ${userRole}`);
+    console.log(` [base.ts] User role extracted: ${userRole}`);
 
-    // Set all cookies with proper expiration
-    setCookie("accessToken", accessToken, 1); // 1 day for access token
-    setCookie("userRole", userRole, 7); // 7 days for role
+    // Set all cookies with proper expiration using global function
+    setCookieGlobal("accessToken", accessToken, 1);
+    setCookieGlobal("userRole", userRole, 7);
 
     if (data.refreshToken) {
-      setCookie("refreshToken", data.refreshToken, 30); // 30 days for refresh token
+      setCookieGlobal("refreshToken", data.refreshToken, 30);
     }
 
     // Store role in sessionStorage as backup
@@ -212,8 +226,7 @@ class ApiClient {
       sessionStorage.setItem("accessToken", accessToken);
     }
 
-    console.log("✅ [base.ts] All cookies set successfully");
-    console.log("📝 [base.ts] Current cookies:", document.cookie);
+    console.log(" [base.ts] All cookies set successfully");
 
     // Dispatch custom event for auth state change
     if (typeof window !== "undefined") {
@@ -250,12 +263,12 @@ class ApiClient {
         response.data?.data?.accessToken || response.data?.accessToken || null;
 
       if (newAccessToken) {
-        setCookie("accessToken", newAccessToken, 1);
+        setCookieGlobal("accessToken", newAccessToken, 1);
 
         // Update role from new token
         const decoded = decodeJWT(newAccessToken);
         if (decoded?.role) {
-          setCookie("userRole", decoded.role, 7);
+          setCookieGlobal("userRole", decoded.role, 7);
           if (typeof sessionStorage !== "undefined") {
             sessionStorage.setItem("userRole", decoded.role);
           }
@@ -287,10 +300,10 @@ class ApiClient {
 
   private clearAuthAndRedirect(): void {
     if (typeof window !== "undefined") {
-      deleteCookie("accessToken");
-      deleteCookie("refreshToken");
-      deleteCookie("userRole");
-      deleteCookie("better-auth.session_token");
+      deleteCookieGlobal("accessToken");
+      deleteCookieGlobal("refreshToken");
+      deleteCookieGlobal("userRole");
+      deleteCookieGlobal("better-auth.session_token");
 
       if (typeof sessionStorage !== "undefined") {
         sessionStorage.removeItem("userRole");
@@ -314,3 +327,4 @@ class ApiClient {
 }
 
 export const apiClient = ApiClient.getInstance().getClient();
+export { deleteCookieGlobal as deleteCookie, setCookieGlobal as setCookie };

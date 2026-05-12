@@ -1,4 +1,4 @@
-// ============ src/features/auth/shared/services/auth.service.ts ============
+// ============ src/features/auth/shared/services/auth.service.ts ====================================
 import { apiClient } from "@/lib/api/base";
 import {
   AuthResponse,
@@ -60,7 +60,7 @@ export const authService = {
     return response.data;
   },
 
-  // ✅ FIXED LOGOUT - Proper cookie clearing
+  //  FIXED LOGOUT - Proper cookie clearing
   logout: async (): Promise<void> => {
     try {
       console.log("📤 [auth.service] Attempting logout...");
