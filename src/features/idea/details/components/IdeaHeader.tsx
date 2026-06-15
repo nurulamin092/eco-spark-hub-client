@@ -10,7 +10,6 @@ interface IdeaHeaderProps {
   idea: Idea;
 }
 
-// ✅ Safe date formatter
 function formatDate(date: string | undefined | null): string {
   if (!date) return "Unknown date";
   try {

@@ -17,7 +17,7 @@ import type {
   RelatedIdea,
 } from "../types/idea.types";
 
-// ✅ Helper to transform frontend filters to backend params
+//  Helper to transform frontend filters to backend params
 export function transformFiltersToParams(
   filters?: IdeaFilters,
 ): Record<string, unknown> {
@@ -38,7 +38,7 @@ export function transformFiltersToParams(
   // Status
   if (filters.status) params.status = filters.status;
 
-  // ✅ Fix: Transform sort values
+  //  Fix: Transform sort values
   if (filters.sort) {
     switch (filters.sort) {
       case "recent":
@@ -70,7 +70,7 @@ export function transformFiltersToParams(
   return params;
 }
 
-// ✅ New helper for category filters (simpler type)
+// New helper for category filters (simpler type)
 interface CategoryFilters {
   page?: number;
   limit?: number;
@@ -114,7 +114,7 @@ export const ideaService = {
 
     const response = await apiClient.get("/ideas", { params });
 
-    // ✅ Handle both response structures
+    //  Handle both response structures
     if (response.data?.data?.data) {
       return response.data;
     }
@@ -209,7 +209,7 @@ export const ideaService = {
     return response.data;
   },
 
-  // ✅ Fixed: Get ideas by category with proper typing
+  //  Fixed: Get ideas by category with proper typing
   getIdeasByCategory: async (
     categoryId: string,
     filters?: CategoryFilters,
@@ -228,5 +228,5 @@ export const ideaService = {
   },
 };
 
-// ✅ Export types for external use
+//  Export types for external use
 export type { CategoryFilters };

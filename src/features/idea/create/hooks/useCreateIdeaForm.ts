@@ -2,7 +2,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   createIdeaSchema,
@@ -14,15 +14,17 @@ import { queryKeys } from "@/lib/react-query/queryKeys";
 
 export function useCreateIdeaForm() {
   const [serverError, setServerError] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync, isPending } = useCreateIdea();
 
-  // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
     queryKey: queryKeys.categories.all,
     queryFn: async () => {
       const response = await ideaService.getCategories();
       return response.data;
     },
+    staleTime: 5 * 60 * 1000,
   });
 
   const categories = useMemo(() => categoriesData || [], [categoriesData]);
@@ -35,14 +37,47 @@ export function useCreateIdeaForm() {
       description: "",
       categoryId: "",
       isPaid: false,
-      price: undefined,
+      price: null, //  null instead of undefined
     } as CreateIdeaFormValues,
     onSubmit: async ({ value }) => {
       setServerError(null);
+
+      console.log(" Form submitted:", {
+        isPaid: value.isPaid,
+        price: value.price,
+      });
+
+      const payload: any = {
+        title: value.title,
+        problem: value.problem,
+        solution: value.solution,
+        description: value.description,
+        categoryId: value.categoryId,
+        isPaid: value.isPaid,
+      };
+
+      if (value.isPaid === true) {
+        if (value.price && value.price >= 0.5) {
+          payload.price = Number(value.price);
+        } else {
+          setServerError(
+            "Please enter a valid price (minimum $0.50) for premium content",
+          );
+          return;
+        }
+      }
+
+      if (uploadedImages.length > 0) {
+        payload.images = uploadedImages;
+      }
+
+      console.log("📦 Final payload:", payload);
+
       try {
-        await mutateAsync(value);
+        await mutateAsync(payload);
       } catch (error: any) {
-        setServerError(error.message);
+        console.error(" Submit error:", error);
+        setServerError(error.message || "Failed to create idea");
       }
     },
     validators: {
@@ -56,6 +91,7 @@ export function useCreateIdeaForm() {
               errors[path] = issue.message;
             }
           });
+          console.log(" Validation errors:", errors);
           return errors;
         }
         return undefined;
@@ -63,21 +99,15 @@ export function useCreateIdeaForm() {
     },
   });
 
-  const handlePriceChange = useCallback(
-    (isPaid: boolean) => {
-      if (!isPaid) {
-        form.setFieldValue("price", undefined);
-      }
-    },
-    [form],
-  );
-
   return {
     form,
     isPending,
     serverError,
     categories,
     isLoadingCategories,
-    handlePriceChange,
+    uploadedImages,
+    setUploadedImages,
+    isUploading,
+    setIsUploading,
   };
 }

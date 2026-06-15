@@ -25,6 +25,7 @@ interface IdeaFormFieldsProps {
   rows?: number;
   options?: Category[];
   disabled?: boolean;
+  required?: boolean;
 }
 
 export function IdeaFormFields({
@@ -35,23 +36,37 @@ export function IdeaFormFields({
   rows = 4,
   options = [],
   disabled = false,
+  required = false,
 }: IdeaFormFieldsProps) {
   const value = field.state.value;
   const errors = field.state.meta.errors ?? [];
   const hasError = field.state.meta.isTouched && errors.length > 0;
 
-  // generic change handler
   const handleChange = useCallback(
     (val: unknown) => {
       field.handleChange(val);
+      field.handleBlur();
     },
     [field],
   );
 
+  //  FIXED: Number change handler - uses null instead of undefined
   const handleNumberChange = useCallback(
     (val: string) => {
-      const parsed = val === "" ? undefined : Number(val);
-      field.handleChange(Number.isNaN(parsed) ? undefined : parsed);
+      if (val === "") {
+        // CRITICAL: Use null, not undefined (matches Prisma schema)
+        field.handleChange(null);
+        field.handleBlur();
+      } else {
+        const parsed = Number(val);
+        // Only set valid positive numbers
+        if (!isNaN(parsed) && parsed > 0) {
+          field.handleChange(parsed);
+        } else {
+          field.handleChange(null);
+        }
+        field.handleBlur();
+      }
     },
     [field],
   );
@@ -70,6 +85,8 @@ export function IdeaFormFields({
             disabled={disabled}
             rows={rows}
             className="resize-y"
+            aria-required={required}
+            aria-invalid={hasError}
           />
         );
 
@@ -78,12 +95,11 @@ export function IdeaFormFields({
           <Select
             value={(value as string) ?? ""}
             onValueChange={handleChange}
-            disabled={disabled}
+            disabled={disabled || options.length === 0}
           >
-            <SelectTrigger>
-              <SelectValue placeholder={placeholder ?? "Select option"} />
+            <SelectTrigger aria-required={required} aria-invalid={hasError}>
+              <SelectValue placeholder={placeholder ?? "Select a category"} />
             </SelectTrigger>
-
             <SelectContent>
               {options.map((option) => (
                 <SelectItem key={option.id} value={option.id}>
@@ -94,6 +110,7 @@ export function IdeaFormFields({
           </Select>
         );
 
+      //  FIXED: Number field with proper null handling
       case "number":
         return (
           <Input
@@ -101,20 +118,24 @@ export function IdeaFormFields({
             name={field.name}
             type="number"
             step="0.01"
-            min="0"
+            min="0.5"
             placeholder={placeholder}
-            value={(value as number | undefined) ?? ""}
+            value={value === null || value === undefined ? "" : value}
             onBlur={field.handleBlur}
             onChange={(e) => handleNumberChange(e.target.value)}
             disabled={disabled}
+            aria-required={required}
+            aria-invalid={hasError}
           />
         );
 
       case "switch":
         return (
           <div className="flex items-center justify-between">
-            <Label htmlFor={field.name}>{label}</Label>
-
+            <Label htmlFor={field.name} className="text-sm font-medium">
+              {label}
+              {required && <span className="text-destructive ml-1">*</span>}
+            </Label>
             <Switch
               id={field.name}
               checked={Boolean(value)}
@@ -135,6 +156,8 @@ export function IdeaFormFields({
             onBlur={field.handleBlur}
             onChange={(e) => handleChange(e.target.value)}
             disabled={disabled}
+            aria-required={required}
+            aria-invalid={hasError}
           />
         );
     }
@@ -145,6 +168,7 @@ export function IdeaFormFields({
       {type !== "switch" && (
         <Label htmlFor={field.name} className="text-sm font-medium">
           {label}
+          {required && <span className="text-destructive ml-1">*</span>}
         </Label>
       )}
 

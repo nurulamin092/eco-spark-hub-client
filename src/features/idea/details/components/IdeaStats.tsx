@@ -27,7 +27,7 @@ function formatNumber(num: number | undefined | null): string {
 }
 
 export function IdeaStats({ idea }: IdeaStatsProps) {
-  // ✅ Safe access with fallback values
+  //  Safe access with fallback values
   const upvoteCount = idea.upvoteCount ?? 0;
   const downvoteCount = idea.downvoteCount ?? 0;
   const netVotes = upvoteCount - downvoteCount;

@@ -22,25 +22,28 @@ export const createIdeaSchema = z
       .min(20, "Description must be at least 20 characters")
       .max(10000, "Description cannot exceed 10000 characters"),
 
-    categoryId: z.string().uuid("Please select a valid category"),
+    categoryId: z.string().min(1, "Please select a category"),
 
-    isPaid: z.boolean().optional().default(false),
+    isPaid: z.boolean().default(false),
 
-    price: z
-      .number()
-      .positive("Price must be positive")
-      .max(999999.99, "Price cannot exceed 999,999.99")
-      .optional(),
+    price: z.number().nullable().optional(),
   })
   .refine(
     (data) => {
-      if (data.isPaid && (!data.price || data.price <= 0)) {
-        return false;
-      }
-      return true;
+      // If not paid, always valid
+      if (!data.isPaid) return true;
+
+      // If paid, price must exist and be >= 0.5 and <= 999
+      return (
+        data.price !== null &&
+        data.price !== undefined &&
+        data.price >= 0.5 &&
+        data.price <= 999
+      );
     },
     {
-      message: "Price is required for paid ideas",
+      message:
+        "Valid price (min $0.50, max $999) is required for premium content",
       path: ["price"],
     },
   );

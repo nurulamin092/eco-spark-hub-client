@@ -21,7 +21,7 @@ export function useRejectIdea() {
       return { success: true, ideaId };
     },
     onSuccess: (_, { ideaId }) => {
-      console.log(`✅ [useRejectIdea] Success for idea: ${ideaId}`);
+      console.log(` [useRejectIdea] Success for idea: ${ideaId}`);
 
       queryClient.invalidateQueries({ queryKey: ["admin-ideas"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });

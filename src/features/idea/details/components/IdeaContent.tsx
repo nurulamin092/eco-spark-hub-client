@@ -9,7 +9,7 @@ interface IdeaContentProps {
   isLocked?: boolean;
 }
 
-// ✅ Safe text formatter
+//  Safe text formatter
 function formatText(text: string | undefined | null): string {
   if (!text) return "No content available.";
   return text;

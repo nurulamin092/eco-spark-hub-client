@@ -16,7 +16,7 @@ export function useApproveIdea() {
       return { success: true, ideaId };
     },
     onSuccess: (_, ideaId) => {
-      console.log(`✅ [useApproveIdea] Success for idea: ${ideaId}`);
+      console.log(` [useApproveIdea] Success for idea: ${ideaId}`);
 
       // Invalidate affected queries
       queryClient.invalidateQueries({ queryKey: ["admin-ideas"] });
