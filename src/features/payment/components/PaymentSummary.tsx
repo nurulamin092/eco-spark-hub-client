@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { usePayment } from "../hooks/usePayment";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, ShoppingBag, TrendingUp } from "lucide-react";
+import { formatCurrency, safeNumber } from "@/lib/utils/format";
 
 export function PaymentSummary() {
   const { data: payments, isLoading } = usePayment();
@@ -19,9 +20,14 @@ export function PaymentSummary() {
     );
   }
 
+  // const totalSpent =
+  //   payments?.reduce(
+  //     (sum, p) => (p.status === "SUCCESS" ? sum + Number(p.amount) : sum),
+  //     0,
+  //   ) ?? 0;
   const totalSpent =
     payments?.reduce(
-      (sum, p) => (p.status === "SUCCESS" ? sum + p.amount : sum),
+      (sum, p) => (p.status === "SUCCESS" ? sum + safeNumber(p.amount) : sum),
       0,
     ) ?? 0;
 
@@ -37,7 +43,7 @@ export function PaymentSummary() {
   const summaryCards = [
     {
       title: "Total Spent",
-      value: `$${totalSpent.toFixed(2)}`,
+      value: formatCurrency(totalSpent),
       icon: DollarSign,
       color: "text-green-500",
       bgColor: "bg-green-500/10",

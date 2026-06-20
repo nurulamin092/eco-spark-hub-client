@@ -52,3 +52,32 @@ export interface PaymentStatusResponse {
   message: string;
   data: Payment | null;
 }
+
+export interface AdminPayment extends Payment {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  idea: {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    price: number;
+  };
+}
+
+export interface AdminPaymentsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+    data: AdminPayment[];
+  };
+}

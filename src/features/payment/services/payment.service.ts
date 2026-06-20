@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiClient } from "@/lib/api/base";
 import {
   CheckoutResponse,
   PaymentsResponse,
   VerifyAccessResponse,
   PaymentStatusResponse,
+  AdminPaymentsResponse,
 } from "../types/payment.types";
 
 export const paymentService = {
@@ -23,6 +25,26 @@ export const paymentService = {
   },
   getPaymentStatus: async (ideaId: string): Promise<PaymentStatusResponse> => {
     const response = await apiClient.get(`/payments/status/${ideaId}`);
+    return response.data;
+  },
+    getAllPaymentsForAdmin: async (params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<AdminPaymentsResponse> => {
+    const response = await apiClient.get("/payments/admin/all", { params });
+    return response.data;
+  },
+
+  approvePayment: async (paymentId: string): Promise<any> => {
+    const response = await apiClient.patch(`/payments/admin/${paymentId}/approve`);
+    return response.data;
+  },
+
+  rejectPayment: async (paymentId: string, reason: string): Promise<any> => {
+    const response = await apiClient.patch(`/payments/admin/${paymentId}/reject`, {
+      reason,
+    });
     return response.data;
   },
 };

@@ -8,6 +8,7 @@ import { Idea } from "../../shared/types/idea.types";
 import { VoteButtons } from "@/features/vote/components/VoteButtons";
 import { BookmarkButton } from "@/features/bookmark/components/BookmarkButton";
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
+import { PaymentButton } from "@/features/payment/components/PaymentButton";
 
 interface IdeaActionsProps {
   idea: Idea;
@@ -47,7 +48,7 @@ export function IdeaActions({ idea, onShare }: IdeaActionsProps) {
       {idea.isPaid && !isLocked && (
         <Button variant="secondary" size="sm" disabled>
           <Lock className="h-4 w-4 mr-1" />
-          Premium
+          <PaymentButton ideaId={idea.id} price={idea.price || 0} size="sm" />
         </Button>
       )}
     </div>

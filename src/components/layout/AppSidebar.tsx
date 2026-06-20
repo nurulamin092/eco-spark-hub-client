@@ -41,6 +41,7 @@ const adminNavItems = [
   { title: "Categories", href: "/admin/categories", icon: FolderTree },
   { title: "User", href: "/admin/users", icon: Users },
   { title: "Ideas", href: "/admin/ideas", icon: Lightbulb },
+  { title: "Payments", href: "/admin/payments", icon: CreditCard },
   { title: "Reports", href: "/admin/reports", icon: Shield },
   { title: "Settings", href: "/admin/settings", icon: Settings },
 ];

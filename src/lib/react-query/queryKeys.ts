@@ -39,6 +39,10 @@ export const queryKeys = {
   payments: {
     myPayments: ["payments", "my-payments"] as const,
     verifyAccess: (ideaId: string) => ["payments", "verify", ideaId] as const,
+    admin: {
+      all: ["payments", "admin", "all"],
+      list: (filters: any) => ["payments", "admin", "list", filters],
+    },
   },
   newsletter: {
     subscribe: ["newsletter", "subscribe"] as const,
