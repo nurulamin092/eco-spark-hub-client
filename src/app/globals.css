@@ -127,3 +127,22 @@ header {
     @apply font-sans;
   }
 }
+
+/* Modal close button fix */
+[data-radix-dialog-content] .absolute {
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+}
+
+[data-radix-dialog-content] .absolute button {
+  pointer-events: auto !important;
+}
+
+/* Dialog content overflow fix */
+[data-radix-dialog-content] {
+  overflow: visible !important;
+}
+
+@theme {
+  --z-modal-close: 9999;
+}

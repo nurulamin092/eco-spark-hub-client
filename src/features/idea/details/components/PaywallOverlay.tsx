@@ -25,7 +25,7 @@ export function PaywallOverlay({ idea }: PaywallOverlayProps) {
           </p>
           <div className="flex items-center justify-center gap-2 mb-6">
             <DollarSign className="h-5 w-5 text-primary" />
-            <span className="text-2xl font-bold">${idea.price}</span>
+            <span className="text-2xl font-bold">{idea.price}</span>
             <span className="text-muted-foreground">one-time payment</span>
           </div>
           <PaymentButton ideaId={idea.id} price={idea.price || 0} size="lg" />

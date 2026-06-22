@@ -51,7 +51,8 @@ export function IdeaCard({ idea }: IdeaCardProps) {
             <div className="flex items-center gap-2">
               {idea.isPaid && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />${idea.price}
+                  <DollarSign className="h-3 w-3" />
+                  {idea.price}
                 </Badge>
               )}
 
