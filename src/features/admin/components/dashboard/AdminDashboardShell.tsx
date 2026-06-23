@@ -5,9 +5,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import { StatsGrid } from "./stats/StatsGrid";
-import { GrowthChart, RevenueChart } from "./charts";
+
 import { PendingIdeasTable, TopIdeasTable } from "./tables";
 import { SystemHealthWidget } from "./health/SystemHealthWidget";
+import { GrowthChart, RevenueChart } from "./charts";
 
 const defaultStats = {
   users: 0,
