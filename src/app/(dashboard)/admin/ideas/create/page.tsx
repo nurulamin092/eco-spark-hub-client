@@ -1,6 +1,6 @@
-import { CreateIdeaForm } from "@/features/idea/create/components/CreateIdeaForm";
 import { Metadata } from "next";
 import { requireAuth } from "@/lib/api/auth.guard";
+import { CreateIdeaForm } from "@/features/idea";
 
 export const metadata: Metadata = {
   title: "Create Idea | EcoSpark Hub",

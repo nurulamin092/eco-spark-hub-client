@@ -24,7 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export default function CreateIdeaForm() {
+export  function CreateIdeaForm() {
   const {
     form,
     isPending,
