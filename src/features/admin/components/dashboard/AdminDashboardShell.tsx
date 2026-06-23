@@ -4,11 +4,12 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useAdminDashboard } from "../../hooks/useAdminDashboard";
-import { StatsGrid } from "./stats";
-
-import { PendingIdeasTable, TopIdeasTable } from "./tables";
-import { SystemHealthWidget } from "./health";
-import { GrowthChart, RevenueChart } from "./charts";
+import { StatsGrid } from "./stats/StatsGrid";
+import { GrowthChart } from "./charts/GrowthChart";
+import { RevenueChart } from "./charts/RevenueChart";
+import { PendingIdeasTable } from "./tables/PendingIdeasTable";
+import { TopIdeasTable } from "./tables/TopIdeasTable";
+import { SystemHealthWidget } from "./health/SystemHealthWidget";
 
 const defaultStats = {
   users: 0,
