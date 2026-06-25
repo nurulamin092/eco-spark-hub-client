@@ -6,8 +6,6 @@ import { AlertCircle } from "lucide-react";
 import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import {
   StatsGrid,
-  GrowthChart,
-  RevenueChart,
   PendingIdeasTable,
   TopIdeasTable,
   SystemHealthWidget,
@@ -24,7 +22,7 @@ const defaultStats = {
 export function AdminDashboardShell() {
   const {
     stats,
-    analytics,
+    // analytics,
     pendingIdeas,
     topIdeas,
     systemHealth,
@@ -46,8 +44,8 @@ export function AdminDashboardShell() {
     <div className="space-y-6">
       <StatsGrid stats={stats || defaultStats} isLoading={isLoading} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GrowthChart data={analytics?.ideas || []} isLoading={isLoading} />
-        <RevenueChart data={analytics?.revenue || []} isLoading={isLoading} />
+        {/* <GrowthChart data={analytics?.ideas || []} isLoading={isLoading} />
+        <RevenueChart data={analytics?.revenue || []} isLoading={isLoading} /> */}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PendingIdeasTable
