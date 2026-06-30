@@ -7,9 +7,7 @@ export interface ApiError {
   details?: Record<string, unknown>;
 }
 
-/**
- * স্ট্যান্ডার্ডাইজড এরর হ্যান্ডলিং
- */
+
 export function handleApiError(error: unknown): ApiError {
   if (error instanceof AxiosError) {
     const statusCode = error.response?.status ?? 500;

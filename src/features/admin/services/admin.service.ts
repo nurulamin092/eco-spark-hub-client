@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // ============ src/features/admin/services/admin.service.ts ============
 import { apiClient } from "@/lib/api/base";
 import type {
@@ -9,7 +8,6 @@ import type {
   PendingIdea,
   RecentReport,
   SystemHealth,
-  Member,
   ApiResponse,
 } from "../types/admin.types";
 
@@ -75,22 +73,6 @@ class AdminService {
   }
 
   // Members
-  async getAllMembers(params: {
-    page?: number;
-    limit?: number;
-    search?: string;
-  }): Promise<{ data: Member[]; meta: any }> {
-    const response = await apiClient.get("/admin/members", { params });
-    return response.data.data;
-  }
-
-  async activateMember(memberId: string): Promise<void> {
-    await apiClient.patch(`/admin/members/${memberId}/activate`);
-  }
-
-  async deactivateMember(memberId: string): Promise<void> {
-    await apiClient.patch(`/admin/members/${memberId}/deactivate`);
-  }
 
   async exportUsers(format: "csv" | "json" = "csv"): Promise<Blob> {
     const response = await apiClient.get(

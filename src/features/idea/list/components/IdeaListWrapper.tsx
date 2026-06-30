@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ✅ Client Component-এ dynamic import with ssr: false
 const IdeaList = dynamic(
   () => import("./IdeaList").then((mod) => mod.IdeaList),
   {

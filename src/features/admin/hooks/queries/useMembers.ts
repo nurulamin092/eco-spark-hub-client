@@ -11,7 +11,7 @@ export function useMembers(filters: {
 }) {
   return useQuery({
     queryKey: MEMBER_QUERY_KEYS.list(filters),
-    queryFn: () => memberService.getMembers(filters),
+    queryFn: () => memberService.getAllMembers(filters),
     placeholderData: (previousData) => previousData,
     staleTime: 30_000,
   });

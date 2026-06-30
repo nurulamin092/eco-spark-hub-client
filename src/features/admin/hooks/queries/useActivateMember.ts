@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,10 +10,13 @@ export function useActivateMember() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: memberService.activate,
+    mutationFn: (id: string) => memberService.activateMember(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MEMBER_QUERY_KEYS.all });
       toast.success("Member activated");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Activation failed");
     },
   });
 }

@@ -16,7 +16,7 @@ import { useMarkAsRead } from "../hooks/useMarkAsRead";
 interface NotificationItemProps {
   notification: Notification;
   onRead?: () => void;
-  onClose?: () => void; // ✅ Add onClose prop
+  onClose?: () => void; 
 }
 
 const iconMap: Record<NotificationType, React.ReactNode> = {

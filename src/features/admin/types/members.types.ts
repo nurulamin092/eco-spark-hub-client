@@ -60,7 +60,7 @@ export interface MembersQueryParams {
   limit?: number;
   search?: string;
   status?: MemberStatus;
-  sortBy?: string;
+  sortBy?: "createdAt" | "name" | "email";
   sortOrder?: "asc" | "desc";
 }
 
@@ -100,3 +100,9 @@ export interface PaginatedMembers {
     totalPages: number;
   };
 }
+export interface BulkActionResponse {
+  success: boolean;
+  message: string;
+  count: number;
+}
+

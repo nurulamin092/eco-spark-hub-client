@@ -13,7 +13,7 @@ import { MyIdeasFilters } from "./MyIdeasFilters";
 import { useMyIdeas } from "../hooks/useMyIdeas";
 import { IdeaStatus } from "../types/my-ideas.types";
 
-// ✅ Debounce hook তৈরি করুন
+
 function useDebounce<T>(value: T, delay: number = 500): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -29,7 +29,7 @@ export function MyIdeasList() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ✅ URL থেকে initial filters নিন
+ 
   const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
   const [status, setStatus] = useState<IdeaStatus | "ALL">(
@@ -38,10 +38,9 @@ export function MyIdeasList() {
 
   const limit = 10;
 
-  // ✅ Debounced search (500ms delay)
   const debouncedSearch = useDebounce(search, 500);
 
-  // ✅ Memoize filters to prevent unnecessary re-renders
+ 
   const filters = useMemo(
     () => ({
       page,
@@ -52,10 +51,10 @@ export function MyIdeasList() {
     [page, debouncedSearch, status],
   );
 
-  // ✅ React Query hook
+ 
   const { data, isLoading, error, refetch, isFetching } = useMyIdeas(filters);
 
-  // ✅ URL update when filters change
+ 
   useEffect(() => {
     const params = new URLSearchParams();
     if (page > 1) params.set("page", String(page));
