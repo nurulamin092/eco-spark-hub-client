@@ -54,7 +54,11 @@ export function AppSidebar() {
   const navItems = isAdmin ? adminNavItems : memberNavItems;
 
   return (
-    <Sidebar variant="sidebar" collapsible="offcanvas" className="border-r">
+    <Sidebar
+      variant="sidebar"
+      collapsible="offcanvas"
+      className="border-r mt-30"
+    >
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>

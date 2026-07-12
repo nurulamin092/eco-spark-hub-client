@@ -2,66 +2,100 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Bell, Leaf } from "lucide-react";
+
 import { cn } from "@/lib/utils/cn";
+import { useAuth } from "@/features/auth/shared/hooks/useAuth";
+
+import { Button } from "@/components/ui/button";
+
 import { NavLinks } from "./NavLinks";
 import { UserMenu } from "./UserMenu";
 import { MobileMenu } from "./MobileMenu";
-import { Zap, Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/features/auth/shared/hooks/useAuth";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+
   const { user } = useAuth();
 
   useEffect(() => {
-    let ticking = false;
-
-    const onScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 10);
-          ticking = false;
-        });
-        ticking = true;
-      }
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 12);
     };
 
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 w-full transition-all",
-        scrolled
-          ? "bg-background/80 backdrop-blur border-b"
-          : "bg-background border-b",
-      )}
-    >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
-          <span className="font-bold text-lg">EcoSpark</span>
-        </Link>
-
-        {/* Nav */}
-        <NavLinks />
-
-        {/* Right */}
-        <div className="flex items-center gap-2">
-          {user && (
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
+    <header className="sticky top-0 z-50 w-full py-3">
+      <div className="mx-auto max-w-7xl px-4">
+        <div
+          className={cn(
+            "glass border-gradient flex h-[72px] items-center justify-between rounded-2xl px-6 transition-all duration-500 ease-out",
+            scrolled && "shadow-card",
           )}
+        >
+          {/* Logo */}
+          <Link href="/" className="group flex items-center gap-3">
+            <div
+              className="
+                flex h-10 w-10 items-center justify-center
+                rounded-xl
+                bg-primary
+                text-primary-foreground
+                shadow-card
+                transition-all
+                duration-500
+                group-hover:scale-105
+                group-hover:rotate-12
+              "
+            >
+              <Leaf className="h-5 w-5" />
+            </div>
 
-          <UserMenu />
-          <MobileMenu />
+            <div className="leading-none">
+              <p className="text-lg font-bold tracking-tight">EcoSpark</p>
+
+              <p className="text-xs text-muted-foreground/70">
+                Sustainable Ideas Hub
+              </p>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <NavLinks />
+
+          {/* Right */}
+          <div className="flex items-center gap-2">
+            {user && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="
+                  glass
+                  rounded-full
+                  border
+                  border-border/50
+                  transition-all
+                  duration-300
+                  hover:scale-105
+                "
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+              </Button>
+            )}
+
+            <UserMenu />
+
+            <MobileMenu />
+          </div>
         </div>
       </div>
     </header>

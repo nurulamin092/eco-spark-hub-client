@@ -1,6 +1,8 @@
+// src/features/idea/create/components/CreateIdeaForm.tsx
+
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import {
   Card,
@@ -17,14 +19,16 @@ import Link from "next/link";
 import { IdeaFormFields } from "./IdeaFormFields";
 import { ImageUploader } from "@/features/upload";
 import { useCreateIdeaForm } from "../hooks/useCreateIdeaForm";
+import { useCreateIdea } from "../hooks/useCreateIdea";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
-export  function CreateIdeaForm() {
+export function CreateIdeaForm() {
   const {
     form,
     isPending,
@@ -35,6 +39,13 @@ export  function CreateIdeaForm() {
     setUploadedImages,
     isUploading,
   } = useCreateIdeaForm();
+
+  const { mutateAsync: createIdea, isPending: mutationIsPending } =
+    useCreateIdea();
+
+  // 🆕 State to store created idea ID
+  const [createdIdeaId, setCreatedIdeaId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageUploadComplete = useCallback(
     (urls: string[]) => {
@@ -49,6 +60,37 @@ export  function CreateIdeaForm() {
       setUploadedImages((prev) => prev.filter((_, i) => i !== index));
     },
     [setUploadedImages],
+  );
+
+  // 🆕 Custom submit handler
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+
+      try {
+        setIsSubmitting(true);
+
+        // Validate form
+        const errors = await form.validate("submit");
+        if (Object.keys(errors).length > 0) {
+          toast.error("Please fix the validation errors.");
+          return;
+        }
+
+        const values = form.state.values;
+        const result = await createIdea(values);
+
+        if (result?.id) {
+          setCreatedIdeaId(result.id);
+          toast.success("Idea created! Now you can upload images.");
+        }
+      } catch (error) {
+        console.error("Create idea error:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [form, createIdea],
   );
 
   if (isLoadingCategories) {
@@ -66,6 +108,8 @@ export  function CreateIdeaForm() {
     );
   }
 
+  const isPendingOrSubmitting = isPending || isSubmitting || mutationIsPending;
+
   return (
     <TooltipProvider>
       <Card className="max-w-3xl mx-auto">
@@ -80,13 +124,7 @@ export  function CreateIdeaForm() {
         </CardHeader>
 
         <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              form.handleSubmit();
-            }}
-            className="space-y-6"
-          >
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
             <form.Field name="title">
               {(field) => (
@@ -94,7 +132,7 @@ export  function CreateIdeaForm() {
                   field={field}
                   label="Title"
                   placeholder="Enter a catchy title (e.g., 'Community Solar Power Initiative')"
-                  disabled={isPending}
+                  disabled={isPendingOrSubmitting}
                   required
                 />
               )}
@@ -109,7 +147,7 @@ export  function CreateIdeaForm() {
                     label="Category"
                     type="select"
                     options={categories}
-                    disabled={isPending || categories.length === 0}
+                    disabled={isPendingOrSubmitting || categories.length === 0}
                     required
                   />
                   {categories.length === 0 && (
@@ -130,7 +168,7 @@ export  function CreateIdeaForm() {
                   type="textarea"
                   placeholder="What environmental problem does this address?"
                   rows={4}
-                  disabled={isPending}
+                  disabled={isPendingOrSubmitting}
                   required
                 />
               )}
@@ -145,7 +183,7 @@ export  function CreateIdeaForm() {
                   type="textarea"
                   placeholder="How does your idea solve this problem?"
                   rows={4}
-                  disabled={isPending}
+                  disabled={isPendingOrSubmitting}
                   required
                 />
               )}
@@ -160,7 +198,7 @@ export  function CreateIdeaForm() {
                   type="textarea"
                   placeholder="Provide implementation details, resources needed, expected impact..."
                   rows={6}
-                  disabled={isPending}
+                  disabled={isPendingOrSubmitting}
                   required
                 />
               )}
@@ -191,11 +229,21 @@ export  function CreateIdeaForm() {
                 </span>
               </div>
 
-              <ImageUploader
-                onUploadComplete={handleImageUploadComplete}
-                maxFiles={10}
-                disabled={isPending || isUploading}
-              />
+              {/* ✅ Fix: Pass ideaId only if it exists */}
+              {createdIdeaId ? (
+                <ImageUploader
+                  ideaId={createdIdeaId}
+                  onUploadComplete={handleImageUploadComplete}
+                  maxFiles={10}
+                  disabled={isPending || isUploading}
+                />
+              ) : (
+                <div className="border-2 border-dashed rounded-lg p-6 text-center bg-muted/30 text-muted-foreground">
+                  <p className="text-sm">
+                    Create the idea first to enable image upload
+                  </p>
+                </div>
+              )}
 
               <p className="text-xs text-muted-foreground">
                 Upload up to 10 images. Supported: JPEG, PNG, WEBP, GIF. Max 5MB
@@ -230,7 +278,7 @@ export  function CreateIdeaForm() {
               )}
             </div>
 
-            {/*  Premium Content Toggle - Price field now inside same Field */}
+            {/* Premium Content Toggle */}
             <form.Field name="isPaid">
               {(field) => {
                 const isPaidValue = field.state.value;
@@ -240,7 +288,7 @@ export  function CreateIdeaForm() {
                       field={field}
                       label="Premium Content"
                       type="switch"
-                      disabled={isPending}
+                      disabled={isPendingOrSubmitting}
                     />
 
                     {isPaidValue && (
@@ -253,37 +301,29 @@ export  function CreateIdeaForm() {
                         </div>
 
                         <form.Field name="price">
-                          {(priceField) => {
-                            const currentPrice = priceField.state.value;
-                            const hasError =
-                              priceField.state.meta.errors?.length > 0;
-                            return (
-                              <div className="space-y-2">
-                                <IdeaFormFields
-                                  field={priceField}
-                                  label="Price (USD)"
-                                  type="number"
-                                  placeholder="Enter price (min $0.50)"
-                                  disabled={isPending}
-                                  required={true}
-                                />
-                                {!hasError &&
-                                  currentPrice &&
-                                  currentPrice >= 0.5 && (
-                                    <p className="text-xs text-green-600">
-                                      💰 You will earn $
-                                      {((currentPrice * 80) / 100).toFixed(2)}{" "}
-                                      per sale
-                                    </p>
-                                  )}
-                                {hasError && (
-                                  <p className="text-xs text-destructive">
-                                    Please enter a valid price (minimum $0.50)
+                          {(priceField) => (
+                            <div className="space-y-2">
+                              <IdeaFormFields
+                                field={priceField}
+                                label="Price (USD)"
+                                type="number"
+                                placeholder="Enter price (min $0.50)"
+                                disabled={isPendingOrSubmitting}
+                                required={true}
+                              />
+                              {priceField.state.value &&
+                                priceField.state.value >= 0.5 && (
+                                  <p className="text-xs text-green-600">
+                                    💰 You will earn $
+                                    {(
+                                      (priceField.state.value * 80) /
+                                      100
+                                    ).toFixed(2)}{" "}
+                                    per sale
                                   </p>
                                 )}
-                              </div>
-                            );
-                          }}
+                            </div>
+                          )}
                         </form.Field>
                       </>
                     )}
@@ -307,18 +347,19 @@ export  function CreateIdeaForm() {
                 onClick={() => {
                   form.reset();
                   setUploadedImages([]);
+                  setCreatedIdeaId(null);
                 }}
-                disabled={isPending}
+                disabled={isPendingOrSubmitting}
               >
                 Reset Form
               </Button>
 
               <Button
                 type="submit"
-                disabled={isPending || isUploading}
+                disabled={isPendingOrSubmitting}
                 className="flex-1"
               >
-                {isPending ? (
+                {isPendingOrSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating Idea...
@@ -344,6 +385,6 @@ export  function CreateIdeaForm() {
           </p>
         </CardFooter>
       </Card>
-    </TooltipProvider>
+    </TooltipProvider> 
   );
 }

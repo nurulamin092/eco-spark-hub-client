@@ -17,19 +17,39 @@ export function Testimonials() {
 
   if (isLoading) {
     return (
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+      <section className=" relative overflow-hidden py-24 lg:py-32">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div className="absolute left-0 top-20 h-80 w-80 rounded-full bg-primary/10 blur-[140px]" />
+
+          <div className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-emerald-400/10 blur-[140px]" />
+        </div>
+        <div className="container relative mx-auto px-4">
+          <div className="animate-fade-in-up mb-16 text-center">
+            <h2
+              className=" mt-6
+    text-4xl
+    font-extrabold
+    tracking-tight
+    md:text-5xl"
+            >
               What Our Community Says
             </h2>
             <p className="text-muted-foreground">
               Real stories from real changemakers
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            className="grid
+grid-cols-1
+gap-8
+md:grid-cols-2
+xl:grid-cols-3"
+          >
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-64 rounded-xl" />
+              <Skeleton key={i} className="h-80 rounded-3xl" />
             ))}
           </div>
         </div>
@@ -40,29 +60,63 @@ export function Testimonials() {
   if (!testimonials.length) return null;
 
   return (
-    <section className="py-16 bg-linear-to-br from-primary/5 to-background">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm mb-4">
+    <section className="relative overflow-hidden py-24 lg:py-32">
+      <div
+        aria-hidden="true"
+        className="
+    pointer-events-none
+    absolute
+    inset-0
+    overflow-hidden
+  "
+      >
+        <div className="absolute left-0 top-20 h-80 w-80 rounded-full bg-primary/10 blur-[140px] " />
+
+        <div className=" absolute right-0 bottom-0  h-72  w-72  rounded-full bg-emerald-400/10 blur-[140px]" />
+      </div>
+      <div className="container relative mx-auto px-4">
+        <div className="animate-fade-in-up mb-16 text-center">
+          <div className=" glass inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm font-medium text-primary">
             <Star className="h-4 w-4 fill-primary text-primary" />
             <span>Testimonials</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className=" mt-6 text-4xl font-extrabold tracking-tight md:text-5xl">
             What Our Community Says
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className=" mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground/80">
             Real stories from real changemakers making a difference
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+          className="grid
+grid-cols-1
+gap-8
+md:grid-cols-2
+xl:grid-cols-3"
+        >
           {testimonials.map((item) => (
             <div
               key={item.id}
-              className="relative p-6 rounded-xl bg-card border shadow-sm hover:shadow-md transition-all"
+              className="group glass border-gradient relative flex flex-col overflow-hidden rounded-3xl p-8 shadow-card transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-premium"
             >
-              <Quote className="absolute top-4 right-4 h-8 w-8 text-primary/20" />
-              <div className="flex items-center gap-1 mb-4">
+              <div
+                aria-hidden="true"
+                className=" pointer-events-none absolute inset-0 rounded-3xl bg-linear-to-br from-white/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              />
+              <Quote
+                className="absolute
+    right-8
+    top-8
+    h-12
+    w-12
+    text-primary/10
+    transition-transform
+    duration-500
+     group-hover:rotate-12
+    group-hover:scale-110"
+              />
+              <div className=" mb-6 flex items-center gap-1">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
@@ -80,17 +134,26 @@ export function Testimonials() {
                   />
                 ))}
               </div>
-              <p className="text-muted-foreground mb-6 line-clamp-4">
+              <p
+                className="flex-1
+    line-clamp-4
+    text-base
+    leading-8
+    text-muted-foreground/80"
+              >
                 &quot;{item.description?.slice(0, 150)}...&quot;
               </p>
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
+              <div className="my-6 h-px w-full bg-border/60" />
+              <div className=" mt-auto flex items-center gap-4">
+                <Avatar className="h-12 w-12 ring-2 ring-primary/10">
                   <AvatarImage src={item.author.image || ""} />
                   <AvatarFallback>{item.author.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{item.author.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="font-semibold tracking-tight">
+                    {item.author.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground/80">
                     {item.category.name}
                   </p>
                 </div>

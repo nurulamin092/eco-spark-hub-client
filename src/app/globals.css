@@ -107,14 +107,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* ONLY these custom styles - NO sidebar positioning overrides */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--background);
-  border-bottom: 1px solid var(--border);
-}
+
 
 @layer base {
   * {
@@ -145,4 +138,349 @@ header {
 
 @theme {
   --z-modal-close: 9999;
+}
+/* ============================================================
+   Premium Design Foundation
+   ============================================================ */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better body background */
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ------------------------------------------------------------
+   Background Grid
+------------------------------------------------------------ */
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(0 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.05) 1px, transparent 1px);
+
+  background-size: 48px 48px;
+}
+
+.dark .bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+}
+
+/* ------------------------------------------------------------
+   Glassmorphism
+------------------------------------------------------------ */
+
+.glass {
+  background: color-mix(in srgb, var(--background) 70%, transparent);
+
+  backdrop-filter: blur(18px);
+
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+}
+
+.glass-strong {
+  background: color-mix(in srgb, var(--background) 82%, transparent);
+
+  backdrop-filter: blur(26px);
+
+  -webkit-backdrop-filter: blur(26px);
+
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+}
+
+/* ------------------------------------------------------------
+   Glow Utilities
+------------------------------------------------------------ */
+
+.glow-primary {
+  box-shadow:
+    0 0 40px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.glow-lg {
+  box-shadow:
+    0 0 90px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+/* ------------------------------------------------------------
+   Premium Shadows
+------------------------------------------------------------ */
+
+.shadow-card {
+  box-shadow:
+    0 10px 40px rgb(0 0 0 / 0.08);
+}
+
+.dark .shadow-card {
+  box-shadow:
+    0 10px 40px rgb(0 0 0 / 0.45);
+}
+
+.shadow-premium {
+  box-shadow:
+    0 20px 60px rgb(0 0 0 / 0.12);
+}
+
+/* ------------------------------------------------------------
+   Border Gradient
+------------------------------------------------------------ */
+
+.border-gradient {
+  position: relative;
+}
+
+.border-gradient::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  padding: 1px;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 70%, white),
+      transparent,
+      color-mix(in srgb, var(--primary) 35%, white)
+    );
+
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+
+  mask-composite: exclude;
+
+  -webkit-mask-composite: xor;
+
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------
+   Animations
+------------------------------------------------------------ */
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    opacity: .45;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: .9;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes fadeUp {
+
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+.animate-fade-up {
+  animation: fadeUp .7s ease forwards;
+}
+
+/* ------------------------------------------------------------
+   Selection
+------------------------------------------------------------ */
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* ============================================================
+   Hero Dashboard
+============================================================ */
+
+
+
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero {
+  animation: heroFadeUp .9s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  opacity: 0;
+
+  animation: fadeInUp .8s ease forwards;
+}
+
+.delay-100 {
+  animation-delay: .1s;
+}
+
+.delay-200 {
+  animation-delay: .2s;
+}
+
+.delay-300 {
+  animation-delay: .3s;
+}
+
+.delay-400 {
+  animation-delay: .4s;
+}
+
+.delay-500 {
+  animation-delay: .5s;
+}
+
+.delay-600 {
+  animation-delay: .6s;
+}
+
+/* ============================================================
+   Dashboard Animation
+============================================================ */
+
+@keyframes dashboardEnter {
+  from {
+    opacity: 0;
+    transform:
+      translateX(40px)
+      scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateX(0)
+      scale(1);
+  }
+}
+
+.animate-dashboard {
+  animation:
+    dashboardEnter
+    1s
+    cubic-bezier(.22,.61,.36,1)
+    forwards;
+}
+
+@keyframes livePulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.4);
+
+    opacity: .5;
+  }
+}
+
+.animate-live {
+  animation: livePulse 1.6s infinite;
+}
+
+@keyframes chartGrow {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.animate-bar {
+  transform-origin: bottom;
+
+  animation:
+    chartGrow
+    .8s
+    ease
+    forwards;
+}
+
+@keyframes progressFill {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 94%;
+  }
+}
+
+.animate-progress {
+  animation:
+    progressFill
+    1.5s
+    ease-out
+    forwards;
 }

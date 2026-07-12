@@ -24,21 +24,60 @@ export function FeaturedIdeas() {
 
   if (isLoading) {
     return (
-      <section className="py-16">
+      <section
+        className="relative
+    overflow-hidden
+    py-24
+    lg:py-32"
+      >
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+          <div className="animate-fade-in-up mb-16 text-center">
+            <div
+              className="glass
+    animate-fade-in-up
+    inline-flex
+    items-center
+    gap-2
+    rounded-full
+    border
+    border-primary/20
+    px-4
+    py-2
+    text-sm
+    font-medium
+    text-primary"
+            >
               <Sparkles className="h-4 w-4" />
               <span>Featured Ideas</span>
             </div>
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+            <h2
+              className=" mt-6
+    text-4xl
+    font-extrabold
+    tracking-tight
+    md:text-5xl"
+            >
               Trending Sustainability Ideas
             </h2>
-            <p className="mx-auto max-w-2xl text-muted-foreground">
+            <p
+              className=" mx-auto
+    mt-5
+    max-w-2xl
+    text-lg
+    leading-8
+    text-muted-foreground/80"
+            >
               Discover the most promising ideas from our community
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            className="  mt-16
+    grid
+    grid-cols-1
+    gap-8
+    md:grid-cols-2
+    xl:grid-cols-3"
+          >
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-96 rounded-xl" />
             ))}
@@ -51,32 +90,112 @@ export function FeaturedIdeas() {
   if (!ideas.length) return null;
 
   return (
-    <section className="py-16">
+    <section
+      className=" relative
+    overflow-hidden
+    py-24
+    lg:py-32"
+    >
+      <div
+        aria-hidden="true"
+        className="
+    absolute
+    inset-0
+    overflow-hidden
+    pointer-events-none"
+      >
+        <div
+          className="
+      absolute
+      left-1/2
+      top-24
+      h-80
+      w-80
+      -translate-x-1/2
+      rounded-full
+      bg-primary/10
+      blur-[120px]
+    "
+        />
+      </div>
       <div className="container mx-auto px-4">
-        <div className="mb-12 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+        <div className="animate-fade-in-up mb-16 text-center">
+          <div
+            className="glass
+    inline-flex
+    items-center
+    gap-2
+    rounded-full
+    border
+    border-primary/20
+    px-4
+    py-2
+    text-sm
+    font-medium
+    text-primary"
+          >
             <Sparkles className="h-4 w-4" />
             <span>Featured Ideas</span>
           </div>
-          <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+          <h2
+            className=" mt-6
+    text-4xl
+    font-extrabold
+    tracking-tight
+    md:text-5xl"
+          >
             Trending Sustainability Ideas
           </h2>
-          <p className="mx-auto max-w-2xl text-muted-foreground">
+          <p
+            className=" mx-auto
+    mt-5
+    max-w-2xl
+    text-lg
+    leading-8
+    text-muted-foreground/80"
+          >
             Discover the most promising ideas from our community
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          className=" mt-16
+    grid
+    grid-cols-1
+    gap-8
+    md:grid-cols-2
+    xl:grid-cols-3"
+        >
           {ideas.map((idea) => (
             <IdeaCard key={idea.id} idea={idea} />
           ))}
         </div>
 
-        <div className="mt-10 text-center">
+        <div
+          className=" mt-16
+    flex
+    justify-center"
+        >
           <Link href="/ideas">
-            <Button variant="outline" size="lg">
+            <Button
+              variant="outline"
+              size="lg"
+              className=" group
+    rounded-full
+    px-8
+    transition-all
+    duration-300
+    hover:-translate-y-1"
+            >
               View All Ideas
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight
+                className=" ml-2
+    h-4
+    w-4
+    transition-transform
+    duration-300
+    group-hover:translate-x-1"
+              />
             </Button>
           </Link>
         </div>

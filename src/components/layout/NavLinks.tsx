@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_LINKS } from "./nav.config";
 import { memo } from "react";
+import { cn } from "@/lib/utils/cn";
+import { NAV_LINKS } from "./nav.config";
 
 function NavLinksComponent() {
   const pathname = usePathname();
@@ -14,21 +15,30 @@ function NavLinksComponent() {
   };
 
   return (
-    <div className="hidden md:flex items-center gap-6">
-      {NAV_LINKS.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={`text-sm font-medium transition-all ${
-            isActive(link.href)
-              ? "text-primary border-b-2 border-primary pb-0.5"
-              : "text-muted-foreground hover:text-primary"
-          }`}
-        >
-          {link.label}
-        </Link>
-      ))}
-    </div>
+    <nav
+      className="hidden items-center rounded-full border border-border/50 glass p-1 backdrop-blur-xl md:flex"
+      aria-label="Main Navigation"
+    >
+      {NAV_LINKS.map((link) => {
+        const active = isActive(link.href);
+
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "relative rounded-full px-5 py-2 text-sm font-medium transition-all duration-300",
+              active
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 

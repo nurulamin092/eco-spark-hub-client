@@ -38,27 +38,114 @@ export function IdeaCard({ idea }: IdeaCardProps) {
 
   return (
     <Link href={`/ideas/${idea.id}`} className="block h-full">
-      <Card className="h-full hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-        <CardHeader>
+      <Card
+        className="group
+    glass
+    border-gradient
+    relative
+    flex
+    h-full
+    flex-col
+    overflow-hidden
+    rounded-3xl
+    border-0
+    shadow-card
+    transition-all
+    duration-500
+    hover:-translate-y-2
+    hover:scale-[1.02]
+    hover:border-primary/20
+    hover:shadow-premium"
+      >
+        <div
+          aria-hidden="true"
+          className="
+   pointer-events-none
+    absolute
+    inset-0
+    rounded-3xl
+    bg-linear-to-br
+    from-white/10
+    via-transparent
+    to-transparent
+    opacity-0
+    transition-opacity
+    duration-500
+    group-hover:opacity-100
+  "
+        />
+        <CardHeader
+          className="  relative
+    space-y-6
+    pb-0"
+        >
           {/* Top Section */}
-          <div className="flex items-start justify-between gap-2">
+          <div
+            className="flex
+    items-start
+    justify-between
+    gap-4"
+          >
             <Badge
-              style={{ backgroundColor: idea.category.color || undefined }}
+              style={{
+                backgroundColor: idea.category.color || "#16a34a",
+              }}
+              className="
+    rounded-full
+    px-3
+    py-1
+    text-xs
+    font-semibold
+    shadow-sm
+  "
             >
               {idea.category.name}
             </Badge>
 
-            <div className="flex items-center gap-2">
+            <div
+              className=" flex
+    items-center
+    gap-2
+    shrink-0"
+            >
               {idea.isPaid && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />
+                <Badge
+                  variant="secondary"
+                  className="  rounded-full
+    px-3
+    py-1
+    font-medium"
+                >
+                  <DollarSign
+                    className="flex
+items-center
+gap-1
+rounded-full
+px-3
+py-1
+font-medium"
+                  />
                   {idea.price}
                 </Badge>
               )}
 
               {idea.isLocked && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Lock className="h-3 w-3" />
+                <Badge
+                  variant="secondary"
+                  className="  rounded-full
+    px-3
+    py-1
+    font-medium"
+                >
+                  <Lock
+                    className="flex
+items-center
+gap-1
+rounded-full
+px-3
+py-1
+font-medium"
+                  />
                   Premium
                 </Badge>
               )}
@@ -66,21 +153,43 @@ export function IdeaCard({ idea }: IdeaCardProps) {
           </div>
 
           {/* Title */}
-          <CardTitle className="line-clamp-2 hover:text-primary transition-colors">
+          <CardTitle
+            className=" line-clamp-2
+    text-2xl
+    font-bold
+    leading-tight
+    tracking-tight
+    transition-colors
+    duration-300
+    group-hover:text-primary"
+          >
             {idea.title}
           </CardTitle>
+          <div className="h-px w-full bg-border/60" />
         </CardHeader>
 
-        <CardContent>
+        <CardContent
+          className="relative
+    flex-1
+    pt-6"
+        >
           {/* Description */}
-          <p className="text-muted-foreground line-clamp-3">
+          <p className="line-clamp-3 text-sm leading-7 text-muted-foreground/80">
             {idea.description}
           </p>
         </CardContent>
 
-        <CardFooter className="flex flex-col items-start gap-4">
+        <CardFooter
+          className="relative
+flex
+flex-col
+items-start
+gap-5
+pt-2
+pb-6"
+        >
           {/* Stats */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
             {/* Votes */}
             <div className="flex items-center gap-2">
               <ArrowUp className="h-4 w-4 text-green-500" />
@@ -103,7 +212,17 @@ export function IdeaCard({ idea }: IdeaCardProps) {
             </div>
 
             {/* Score */}
-            <div className="flex items-center gap-1 font-medium">
+            <div
+              className="flex
+items-center
+gap-1
+rounded-full
+bg-primary/10
+px-3
+py-1
+text-xs
+font-medium"
+            >
               <span>Score:</span>
               <span
                 className={
@@ -121,16 +240,20 @@ export function IdeaCard({ idea }: IdeaCardProps) {
 
           {/* Author */}
           <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
+            <Avatar className="h-9 w-9">
               <AvatarImage src={idea.author.image || ""} />
               <AvatarFallback>
                 {idea.author.name?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
 
-            <span className="text-sm text-muted-foreground">
-              {idea.author.name}
-            </span>
+            <div className="flex flex-col">
+              <span className="font-medium">{idea.author.name}</span>
+
+              <span className="text-xs text-muted-foreground">
+                Idea Creator
+              </span>
+            </div>
           </div>
         </CardFooter>
       </Card>

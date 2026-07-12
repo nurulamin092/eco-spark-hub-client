@@ -15,18 +15,19 @@ interface NewsletterFormProps {
 const variantStyles = {
   default: {
     container: "max-w-md mx-auto",
-    input: "bg-background",
+    input: "glass border-border/50",
     button: "",
   },
   footer: {
     container: "w-full",
-    input: "bg-background",
+    input: "glass border-border/50",
     button: "",
   },
   hero: {
-    container: "max-w-md mx-auto",
-    input: "bg-background",
-    button: "bg-primary text-primary-foreground hover:bg-primary/90",
+    container: "max-w-xl mx-auto",
+    input: "glass border-border/50",
+    button:
+      "group transition-all duration-300 hover:-translate-y-0.5 text-primary-foreground hover:bg-primary/90",
   },
 };
 
@@ -64,7 +65,7 @@ export function NewsletterForm({
 
   return (
     <div className={`${styles.container} ${className}`}>
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -74,11 +75,20 @@ export function NewsletterForm({
             onChange={(e) => setEmail(e.target.value)}
             disabled={isPending}
             required
-            className={`pl-10 ${styles.input}`}
+            className={`h-12 rounded-xl pl-10 ${styles.input}`}
             aria-label="Email address for newsletter"
           />
         </div>
-        <Button type="submit" disabled={isPending} className={styles.button}>
+        <Button
+          type="submit"
+          disabled={isPending}
+          className={`
+h-12
+rounded-xl
+px-6
+${styles.button}
+`}
+        >
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
