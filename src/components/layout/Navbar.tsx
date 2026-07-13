@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { NavLinks } from "./NavLinks";
 import { UserMenu } from "./UserMenu";
 import { MobileMenu } from "./MobileMenu";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -37,7 +38,7 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4">
         <div
           className={cn(
-            "glass border-gradient flex h-[72px] items-center justify-between rounded-2xl px-6 transition-all duration-500 ease-out",
+            "glass border-gradient flex h-18 items-center justify-between rounded-2xl px-6 transition-all duration-500 ease-out",
             scrolled && "shadow-card",
           )}
         >
@@ -73,6 +74,7 @@ export function Navbar() {
 
           {/* Right */}
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             {user && (
               <Button
                 variant="ghost"
