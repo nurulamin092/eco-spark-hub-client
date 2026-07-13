@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 import {
@@ -28,7 +29,7 @@ export function LoginForm() {
   const [role, setRole] = useState<"member" | "admin">("member");
 
   // Later you can do:
-  // const {...} = useLoginForm(role);
+
   const { form, isPending, serverError, showPassword, setShowPassword } =
     useLoginForm();
 
@@ -40,7 +41,27 @@ export function LoginForm() {
     email: "admin@eco.com",
     password: "password",
   };
+  useEffect(() => {
+    if (role === "member") {
+      form.setFieldValue("email", DEMO_MEMBER.email);
+      form.setFieldValue("password", DEMO_MEMBER.password);
+    } else {
+      form.setFieldValue("email", DEMO_ADMIN.email);
+      form.setFieldValue("password", DEMO_ADMIN.password);
+    }
+  }, [role]);
 
+  const changeRole = (newRole: "member" | "admin") => {
+    setRole(newRole);
+
+    if (newRole === "member") {
+      form.setFieldValue("email", DEMO_MEMBER.email);
+      form.setFieldValue("password", DEMO_MEMBER.password);
+    } else {
+      form.setFieldValue("email", DEMO_ADMIN.email);
+      form.setFieldValue("password", DEMO_ADMIN.password);
+    }
+  };
   return (
     <Card className="mx-auto w-full max-w-md rounded-3xl border-gradient glass shadow-card">
       <CardHeader className="space-y-6">
@@ -48,11 +69,21 @@ export function LoginForm() {
         <div className="grid grid-cols-2 rounded-2xl bg-muted p-1">
           <button
             type="button"
-            onClick={() => {
-              setRole("admin");
-              form.setFieldValue("email", DEMO_ADMIN.email);
-              form.setFieldValue("password", DEMO_ADMIN.password);
-            }}
+            onClick={() => changeRole("member")}
+            className={cn(
+              "flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all",
+              role === "member"
+                ? "bg-background shadow-sm text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <User className="h-4 w-4" />
+            Member
+          </button>
+
+          <button
+            type="button"
+            onClick={() => changeRole("admin")}
             className={cn(
               "flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all",
               role === "admin"
@@ -62,23 +93,6 @@ export function LoginForm() {
           >
             <ShieldCheck className="h-4 w-4" />
             Admin
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setRole("member");
-              form.setFieldValue("email", DEMO_MEMBER.email);
-              form.setFieldValue("password", DEMO_MEMBER.password);
-            }}
-            className={cn(
-              "flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-all",
-              role === "member"
-                ? "bg-background shadow-sm text-foreground"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <ShieldCheck className="h-4 w-4" />
-            Member
           </button>
         </div>
 
