@@ -43,12 +43,14 @@ export default function DashboardLayout({
         <AppSidebar />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <Navbar />
-
-          <main className="flex-1 p-6 md:p-8">
-            <div className="container mx-auto px-8 xl:px-10 2xl:px-12">
-              {children}
+          <div className="px-6 py-4 lg:px-8">
+            <div className="mx-auto w-full max-w-7xl">
+              <Navbar />
             </div>
+          </div>
+
+          <main className="flex-1 px-6 pb-8 lg:px-8">
+            <div className="mx-auto w-full max-w-7xl">{children}</div>
           </main>
         </div>
       </div>
