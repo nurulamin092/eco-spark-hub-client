@@ -35,7 +35,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="w-full">
+      <div className="mx-auto max-w-7xl px-4">
         <div
           className={cn(
             "glass border-gradient flex h-18 items-center justify-between rounded-2xl px-6 transition-all duration-500 ease-out",
