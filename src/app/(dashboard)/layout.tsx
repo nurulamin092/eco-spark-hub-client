@@ -1,4 +1,5 @@
-// src/app/(dashboard)/layout.tsx (updated)
+// src/app/(dashboard)/layout.tsx
+
 "use client";
 
 import { useAuth } from "@/features/auth/shared/hooks/useAuth";
@@ -7,6 +8,7 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { Navbar } from "@/components/layout/Navbar";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +21,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (isLoading) return;
+
     if (error || !user) {
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
@@ -26,7 +29,7 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -35,12 +38,17 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="dashboard-layout relative flex min-h-screen w-full">
+    <SidebarProvider defaultOpen>
+      <div className="flex min-h-screen w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Navbar />
+
           <main className="flex-1 p-6 md:p-8">
-            <div className="container mx-auto max-w-7xl">{children}</div>
+            <div className="container mx-auto px-8 xl:px-10 2xl:px-12">
+              {children}
+            </div>
           </main>
         </div>
       </div>

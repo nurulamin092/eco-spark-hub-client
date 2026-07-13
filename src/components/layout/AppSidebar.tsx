@@ -57,7 +57,11 @@ export function AppSidebar() {
     <Sidebar
       variant="sidebar"
       collapsible="offcanvas"
-      className="border-r mt-30"
+      className="w-72
+border-r
+border-border/60
+bg-background/95
+backdrop-blur-xl"
     >
       <SidebarContent>
         <SidebarGroup>
