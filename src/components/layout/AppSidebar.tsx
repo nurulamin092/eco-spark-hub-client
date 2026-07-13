@@ -32,7 +32,7 @@ const memberNavItems = [
   { title: "My Ideas", href: "/member/ideas", icon: Lightbulb },
   { title: "Bookmarks", href: "/member/bookmarks", icon: Bookmark },
   { title: "Payments", href: "/member/payments", icon: CreditCard },
-  { title: "Profile", href: "/member/profile", icon: User },
+  // { title: "Profile", href: "/member/profile", icon: User },
   { title: "Settings", href: "/member/settings", icon: Settings },
 ];
 

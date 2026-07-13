@@ -1,227 +1,142 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { useState, useEffect } from "react";
+
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import { ProfileImageUpload } from "@/features/upload";
 import { useProfile } from "../hooks/useProfile";
 import { useUpdateProfile } from "../hooks/useUpdateProfile";
 import { profileSchema, ProfileFormValues } from "../schema/profile.schema";
-import { AppField } from "@/components/shared/form/AppField";
-import { AppSubmitButton } from "@/components/shared/form/AppSubmitButton";
-import { DangerZone } from "./DangerZone";
+
+import { BasicInformationSection } from "./ProfileForm/BasicInformationSection";
+import { ContactInformationSection } from "./ProfileForm/ContactInformationSection";
+import { AboutSection } from "./ProfileForm/AboutSection";
+import { SaveSection } from "./ProfileForm/SaveSection";
 
 export function ProfileForm() {
   const { profile, isLoading: isProfileLoading } = useProfile();
+
   const { mutateAsync, isPending } = useUpdateProfile();
+
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
       name: profile?.name || "",
       email: profile?.email || "",
-      bio: profile?.bio || "",
       phone: profile?.phone || "",
       address: profile?.address || "",
+      bio: profile?.bio || "",
     } as ProfileFormValues,
+
     onSubmit: async ({ value }) => {
       setServerError(null);
+
       try {
         await mutateAsync(value);
       } catch (error: any) {
         setServerError(error.message);
       }
     },
+
     validators: {
       onChange: ({ value }) => {
         const result = profileSchema.safeParse(value);
+
         if (!result.success) {
           const errors: Record<string, string> = {};
+
           result.error.issues.forEach((issue) => {
             const path = issue.path[0];
-            if (path && typeof path === "string") {
+
+            if (typeof path === "string") {
               errors[path] = issue.message;
             }
           });
+
           return errors;
         }
+
         return undefined;
       },
     },
   });
 
-  // Update form values when profile loads
   useEffect(() => {
-    if (profile) {
-      form.update({
-        defaultValues: {
-          name: profile?.name ?? "",
-          email: profile?.email ?? "",
-          bio: profile?.bio ?? "",
-          phone: profile?.phone ?? "",
-          address: profile?.address ?? "",
-        },
-      });
-    }
+    if (!profile) return;
+
+    form.update({
+      defaultValues: {
+        name: profile.name ?? "",
+        email: profile.email ?? "",
+        phone: profile.phone ?? "",
+        address: profile.address ?? "",
+        bio: profile.bio ?? "",
+      },
+    });
   }, [profile, form]);
 
   if (isProfileLoading) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="py-10">
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          </div>
+      <Card className="rounded-3xl">
+        <CardContent className="flex justify-center py-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="w-full max-w-2xl mx-auto shadow-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Profile Settings</CardTitle>
-          <CardDescription>
-            Update your personal information and profile picture
-          </CardDescription>
-        </CardHeader>
+    <Card
+      className="
+        glass
+        border-gradient
+        rounded-3xl
+        shadow-card
+      "
+    >
+      <CardHeader>
+        <CardTitle className="text-3xl font-bold">Edit Profile</CardTitle>
 
-        <CardContent className="space-y-6">
-          {/* ✅ Profile Image Upload - Integrated */}
-          <div className="flex flex-col items-center space-y-4 pb-6 border-b">
-            <ProfileImageUpload />
-            <p className="text-sm text-muted-foreground">
-              Click the camera icon to upload a profile picture
-            </p>
-          </div>
+        <CardDescription>
+          Keep your personal information up to date.
+        </CardDescription>
+      </CardHeader>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              form.handleSubmit();
-            }}
-            className="space-y-4"
-          >
-            <form.Field name="name">
-              {(field) => (
-                <AppField
-                  name={field.name}
-                  label="Full Name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors?.[0] as string | undefined}
-                  disabled={isPending}
-                />
-              )}
-            </form.Field>
+      <CardContent>
+        <form
+          className="space-y-8"
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+        >
+          <BasicInformationSection form={form} isPending={isPending} />
 
-            <form.Field name="email">
-              {(field) => (
-                <AppField
-                  name={field.name}
-                  label="Email Address"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors?.[0] as string | undefined}
-                  disabled={isPending}
-                />
-              )}
-            </form.Field>
+          <ContactInformationSection form={form} isPending={isPending} />
 
-            <form.Field name="phone">
-              {(field) => (
-                <AppField
-                  name={field.name}
-                  label="Phone Number"
-                  type="tel"
-                  placeholder="Enter your phone number"
-                  value={field.state.value ?? ""}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors?.[0] as string | undefined}
-                  disabled={isPending}
-                />
-              )}
-            </form.Field>
+          <AboutSection form={form} isPending={isPending} />
 
-            <form.Field name="bio">
-              {(field) => (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Bio</label>
-                  <textarea
-                    name={field.name}
-                    placeholder="Tell us about yourself"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    disabled={isPending}
-                    className="w-full min-h-25 rounded-lg border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  />
-                  {field.state.meta.errors?.[0] && (
-                    <p className="text-sm text-destructive">
-                      {String(field.state.meta.errors[0])}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+          {serverError && (
+            <Alert variant="destructive">
+              <AlertDescription>{serverError}</AlertDescription>
+            </Alert>
+          )}
 
-            <form.Field name="address">
-              {(field) => (
-                <AppField
-                  name={field.name}
-                  label="Address"
-                  type="text"
-                  placeholder="Enter your address"
-                  value={field.state.value ?? ""}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors?.[0] as string | undefined}
-                  disabled={isPending}
-                />
-              )}
-            </form.Field>
-
-            {serverError && (
-              <Alert variant="destructive">
-                <AlertDescription>{serverError}</AlertDescription>
-              </Alert>
-            )}
-
-            <AppSubmitButton
-              isPending={isPending}
-              text="Save Changes"
-              loadingText="Saving..."
-            />
-          </form>
-        </CardContent>
-
-        <CardFooter className="justify-center border-t pt-4">
-          <p className="text-sm text-muted-foreground">
-            Your information is safe with us
-          </p>
-        </CardFooter>
-      </Card>
-
-      <DangerZone />
-    </div>
+          <SaveSection isPending={isPending} />
+        </form>
+      </CardContent>
+    </Card>
   );
 }
